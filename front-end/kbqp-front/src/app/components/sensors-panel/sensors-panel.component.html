@@ -1,0 +1,62 @@
+<section class="card panel-with-info">
+  <aside class="panel-side">
+    <info-dialog-btn
+      title="Sensors & trends"
+      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). One chart point per simulated 30 min sub-step: a single Step of 150 min adds five points. Workload (click to cycle): Normal — drift around nominal; Overworked — worsen only; Rest — eases toward nominal. Halted machines keep last readings until Fix. Reset clears charts."
+    />
+  </aside>
+  <div class="panel-content">
+    <div class="panel-heading">
+      <h3>Sensors & trends</h3>
+    </div>
+    <div class="table sensors sensors-grouped">
+      <div class="table-head sensors-grouped-head">
+        <div class="th">Metric</div>
+        <div class="th right">Value</div>
+        <div class="th right">Time</div>
+      </div>
+
+      <div class="table-body sensors-grouped-body sensors-with-charts scroll-pad">
+        @for (g of groups(); track g.machineId) {
+          <div class="sensor-group" [class]="machineGroupClass(g.slug)">
+            <div class="sensor-group-head">
+              <span class="tag">{{ g.machineId }}</span>
+              <button
+                type="button"
+                class="btn secondary workload-btn"
+                [class.workload-state-normal]="workloadOf(g.machineId) === 'NORMAL'"
+                [class.workload-state-overworked]="workloadOf(g.machineId) === 'OVERWORKED'"
+                [class.workload-state-rest]="workloadOf(g.machineId) === 'REST'"
+                [title]="workloadTitle(g.machineId)"
+                [disabled]="controlsBusy"
+                (click)="workloadCycle.emit(g.machineId)"
+              >
+                {{ workloadLabel(g.machineId) }}
+              </button>
+              @if (isHalted(g.machineId)) {
+                <span class="pill warn tag-halted">halted</span>
+              }
+            </div>
+            <div class="sensor-metrics-grid">
+              @for (s of g.rows; track s.metric) {
+                <div class="sensor-metric-card" [class.sensor-row-stale]="isHalted(g.machineId)">
+                  <div class="tr sensor-metric-row">
+                    <div class="td mono">{{ s.metric }}</div>
+                    <div class="td mono right">{{ s.value.toFixed(2) }}</div>
+                    <div class="td mono muted date-cell right">{{ s.ts | prettyDate }}</div>
+                  </div>
+                  <div class="sensor-sparkline-wrap">
+                    <sensor-sparkline
+                      [points]="history().get(g.machineId + '|' + s.metric) ?? emptyPoints"
+                      [metricLabel]="s.metric"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

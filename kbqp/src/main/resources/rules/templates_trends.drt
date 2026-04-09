@@ -1,0 +1,71 @@
+template header
+riseRuleName
+clearRuleName
+anomalyType
+metricField
+riseDescription
+
+package rules;
+
+import com.luka.kbpdm.domain.Machine;
+import com.luka.kbpdm.domain.Anomaly;
+import com.luka.kbpdm.domain.AnomalyType;
+import com.luka.kbpdm.domain.SimulatedClock;
+import com.luka.kbpdm.domain.TickStatus;
+import java.lang.Number;
+
+dialect "java"
+
+template "tickstatus-metric-trend"
+
+rule "@{riseRuleName}"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $m : Machine( $id : machineId )
+  $maxTick : Number() from accumulate(
+    TickStatus( machineId == $id, $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : TickStatus( machineId == $id, $i11 : tickIndex == $maxTick.longValue(), $v11 : @{metricField} )
+  $t10 : TickStatus( machineId == $id, tickIndex == $i11 - 1, @{metricField} < $v11, $v10 : @{metricField} )
+  $t9 : TickStatus( machineId == $id, tickIndex == $i11 - 2, @{metricField} < $v10, $v9 : @{metricField} )
+  $t8 : TickStatus( machineId == $id, tickIndex == $i11 - 3, @{metricField} < $v9, $v8 : @{metricField} )
+  $t7 : TickStatus( machineId == $id, tickIndex == $i11 - 4, @{metricField} < $v8, $v7 : @{metricField} )
+  $t6 : TickStatus( machineId == $id, tickIndex == $i11 - 5, @{metricField} < $v7, $v6 : @{metricField} )
+  $t5 : TickStatus( machineId == $id, tickIndex == $i11 - 6, @{metricField} < $v6, $v5 : @{metricField} )
+  $t4 : TickStatus( machineId == $id, tickIndex == $i11 - 7, @{metricField} < $v5, $v4 : @{metricField} )
+  $t3 : TickStatus( machineId == $id, tickIndex == $i11 - 8, @{metricField} < $v4, $v3 : @{metricField} )
+  $t2 : TickStatus( machineId == $id, tickIndex == $i11 - 9, @{metricField} < $v3, $v2 : @{metricField} )
+  $t1 : TickStatus( machineId == $id, tickIndex == $i11 - 10, @{metricField} < $v2, $v1 : @{metricField} )
+  not Anomaly( machineId == $id, type == AnomalyType.@{anomalyType} )
+then
+  insert(new Anomaly(
+      $id,
+      AnomalyType.@{anomalyType},
+      "@{riseDescription}",
+      $t
+  ));
+end
+
+rule "@{clearRuleName}"
+salience 16
+when
+  SimulatedClock( )
+  $m : Machine( $id : machineId )
+  $a : Anomaly( machineId == $id, type == AnomalyType.@{anomalyType} )
+  $maxTick : Number() from accumulate(
+    TickStatus( machineId == $id, $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : TickStatus( machineId == $id, $i6 : tickIndex == $maxTick.longValue(), $w6 : @{metricField} )
+  $c5 : TickStatus( machineId == $id, tickIndex == $i6 - 1, @{metricField} > $w6, $w5 : @{metricField} )
+  $c4 : TickStatus( machineId == $id, tickIndex == $i6 - 2, @{metricField} > $w5, $w4 : @{metricField} )
+  $c3 : TickStatus( machineId == $id, tickIndex == $i6 - 3, @{metricField} > $w4, $w3 : @{metricField} )
+  $c2 : TickStatus( machineId == $id, tickIndex == $i6 - 4, @{metricField} > $w3, $w2 : @{metricField} )
+  $c1 : TickStatus( machineId == $id, tickIndex == $i6 - 5, @{metricField} > $w2, $w1 : @{metricField} )
+then
+  delete( $a );
+end
+
+end template

@@ -1,0 +1,76 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.sparkline {
+  width: 100%;
+  height: 52px;
+  display: block;
+}
+
+.sparkline-bg {
+  fill: rgba(0, 0, 0, 0.2);
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 0.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.sparkline-line {
+  stroke: rgba(207, 224, 255, 0.7);
+  stroke-width: 1.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.sparkline-area {
+  opacity: 0.42;
+}
+
+.sparkline-empty {
+  fill: #7a8bad;
+  font-size: 5.5px;
+  font-family: var(--kb-font);
+}
+
+.sparkline-fill-stop0 {
+  stop-color: #cfe0ff;
+  stop-opacity: 0.28;
+}
+
+.sparkline-fill-stop1 {
+  stop-color: #cfe0ff;
+  stop-opacity: 0.02;
+}
+
+:host-context(.sensor-group.machine-lin) {
+  .sparkline-line {
+    stroke: #5b94f5;
+  }
+
+  .sparkline-fill-stop0 {
+    stop-color: #2d6cdf;
+    stop-opacity: 0.38;
+  }
+
+  .sparkline-fill-stop1 {
+    stop-color: #2d6cdf;
+    stop-opacity: 0.02;
+  }
+}
+
+:host-context(.sensor-group.machine-cnc) {
+  .sparkline-line {
+    stroke: #d8b4fe;
+  }
+
+  .sparkline-fill-stop0 {
+    stop-color: #c084fc;
+    stop-opacity: 0.32;
+  }
+
+  .sparkline-fill-stop1 {
+    stop-color: #c084fc;
+    stop-opacity: 0.02;
+  }
+}

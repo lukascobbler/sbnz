@@ -1,0 +1,10 @@
+<button type="button" class="info-btn" (click)="open(dlg)" [attr.aria-label]="'About: ' + title">
+  i
+</button>
+<dialog #dlg class="info-dialog" (click)="onBackdrop($event, dlg)">
+  <div class="dialog-panel" (click)="$event.stopPropagation()">
+    <h4 class="dialog-title">{{ title }}</h4>
+    <p class="dialog-body">{{ body }}</p>
+    <button type="button" class="btn secondary" (click)="dlg.close()">Close</button>
+  </div>
+</dialog>

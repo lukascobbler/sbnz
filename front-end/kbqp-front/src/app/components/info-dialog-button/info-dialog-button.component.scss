@@ -1,0 +1,66 @@
+.info-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--kb-accent);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.info-btn:hover {
+  background: rgba(124, 58, 237, 0.25);
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
+.info-dialog {
+  margin: auto;
+  max-width: min(440px, calc(100vw - 32px));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  background: #121a2b;
+  color: var(--kb-text);
+  padding: 0;
+}
+
+.info-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dialog-panel {
+  padding: 18px 20px 16px;
+}
+
+.dialog-title {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: var(--kb-accent);
+}
+
+.dialog-body {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--kb-muted);
+}
+
+.btn {
+  background: linear-gradient(135deg, #2d6cdf, #7c3aed);
+  color: white;
+  border: 0;
+  padding: 7px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

@@ -1,0 +1,136 @@
+:host {
+  display: contents;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+
+.controls-busy .btn,
+.controls-busy .tick-arrow,
+.controls-busy .tick-field {
+  cursor: not-allowed;
+}
+
+.controls-time {
+  margin-left: auto;
+  text-align: right;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.field-label {
+  font-size: 10px;
+  color: #b7c7e5;
+}
+
+.input {
+  width: 76px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  outline: none;
+  color: var(--kb-text);
+  padding: 4px 7px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.input:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+
+.mono {
+  font-family: var(--kb-mono);
+}
+
+.btn {
+  background: linear-gradient(135deg, #2d6cdf, #7c3aed);
+  color: white;
+  border: 0;
+  padding: 6px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  transition: transform 0.08s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+}
+
+.btn:active {
+  transform: translateY(0px);
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 10px;
+}
+
+.pill.ok {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.pill.bad {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.tick-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tick-readonly {
+  width: 48px;
+  text-align: center;
+  cursor: default;
+  opacity: 0.92;
+}
+
+.tick-readonly:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.tick-arrow {
+  min-width: 28px;
+  padding: 4px 6px;
+  font-weight: 700;
+}

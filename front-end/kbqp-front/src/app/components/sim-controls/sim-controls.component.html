@@ -1,0 +1,34 @@
+<div class="controls" [class.controls-busy]="controlsBusy">
+  <span class="pill" [class.ok]="connected" [class.bad]="!connected">
+    {{ connected ? 'CONNECTED' : 'DISCONNECTED' }}
+  </span>
+
+  <label class="field tick-field">
+    <span class="field-label">tick (min)</span>
+    <div class="tick-stepper">
+      <button
+        type="button"
+        class="btn secondary tick-arrow"
+        title="−30 min"
+        (click)="tickStep.emit(-1)"
+        [disabled]="controlsBusy || tickMinutes <= 30"
+      >
+        −
+      </button>
+      <input class="input mono tick-readonly" type="text" [value]="tickMinutes" readonly tabindex="-1" />
+      <button
+        type="button"
+        class="btn secondary tick-arrow"
+        title="+30 min"
+        (click)="tickStep.emit(1)"
+        [disabled]="controlsBusy || tickMinutes >= 900"
+      >
+        +
+      </button>
+    </div>
+  </label>
+
+  <button type="button" class="btn secondary" (click)="reset.emit()" [disabled]="controlsBusy">Reset</button>
+  <button type="button" class="btn" (click)="step.emit()" [disabled]="controlsBusy">Next</button>
+  <span class="pill mono controls-time">Time = {{ simulatedTime | prettyDate }}</span>
+</div>

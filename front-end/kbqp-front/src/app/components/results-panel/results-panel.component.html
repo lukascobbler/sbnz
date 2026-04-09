@@ -1,0 +1,156 @@
+<div class="results-stack">
+  <div class="grid results-two">
+    <section class="card panel-with-info">
+      <aside class="panel-side">
+        <info-dialog-btn
+          title="Anomalies"
+          body="Facts in Drools working memory (from rules), sorted by detected time. Timestamps use the simulated clock fact so they align with pseudo-time."
+        />
+      </aside>
+      <div class="panel-content">
+        <div class="panel-heading">
+          <h3>Anomalies</h3>
+        </div>
+        <div class="table event-log anomalies-table">
+          <div class="table-head event-log-head">
+            <div class="th">Time</div>
+            <div class="th">Machine</div>
+            <div class="th">Type</div>
+            <div class="th wide">Details</div>
+          </div>
+          <div class="table-body dashboard-scroll-body scroll-pad">
+            @for (a of anomalies; track $index) {
+              <div
+                class="tr event-log-row machine-accent-row"
+                [class.machine-lin]="a.machineId === 'LIN'"
+                [class.machine-cnc]="a.machineId === 'CNC'"
+              >
+                <div class="td mono muted date-cell">{{ a.detectedAt | prettyDate }}</div>
+                <div class="td">
+                  <span
+                    class="pill pill-machine"
+                    [class.pill-lin]="a.machineId === 'LIN'"
+                    [class.pill-cnc]="a.machineId === 'CNC'"
+                    >{{ a.machineId }}</span>
+                </div>
+                <div class="td"><span class="pill warn">{{ a.type }}</span></div>
+                <div class="td small wide">{{ a.description }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card panel-with-info">
+      <aside class="panel-side">
+        <info-dialog-btn
+          title="Interventions"
+          body="Working-memory interventions derived from anomalies (L3 rules), sorted by decided time."
+        />
+      </aside>
+      <div class="panel-content">
+        <div class="panel-heading">
+          <h3>Interventions</h3>
+        </div>
+        <div class="table event-log interventions-table">
+          <div class="table-head event-log-head">
+            <div class="th">Time</div>
+            <div class="th">Machine</div>
+            <div class="th">Priority</div>
+            <div class="th wide">Action</div>
+          </div>
+          <div class="table-body dashboard-scroll-body scroll-pad">
+            @for (i of interventions; track $index) {
+              <div
+                class="tr event-log-row machine-accent-row"
+                [class.machine-lin]="i.machineId === 'LIN'"
+                [class.machine-cnc]="i.machineId === 'CNC'"
+              >
+                <div class="td mono muted date-cell">{{ i.decidedAt | prettyDate }}</div>
+                <div class="td">
+                  <span
+                    class="pill pill-machine"
+                    [class.pill-lin]="i.machineId === 'LIN'"
+                    [class.pill-cnc]="i.machineId === 'CNC'"
+                    >{{ i.machineId }}</span>
+                </div>
+                <div class="td">
+                  <span
+                    class="pill"
+                    [class.pill-pri-medium]="i.priority === 'MEDIUM'"
+                    [class.pill-pri-high]="i.priority === 'HIGH'"
+                    [class.pill-pri-critical]="i.priority === 'CRITICAL'"
+                    >{{ i.priority }}</span>
+                </div>
+                <div class="td small wide">{{ i.recommendation }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card panel-with-info">
+    <aside class="panel-side">
+      <info-dialog-btn
+        title="Safety"
+        body="UNSAFE only when a machine is halted: after POTENTIAL_BEARING_FAILURE is present for 5 consecutive simulation sub-steps, the engine inserts CRITICAL intervention, sets component HealthStatus.FAIL, and halts telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
+      />
+    </aside>
+    <div class="panel-content">
+      <div class="panel-heading">
+        <h3>Safety</h3>
+      </div>
+      @if (haltedMachineIds.length > 0) {
+        <p class="muted small safety-hint">
+          Halted (no new telemetry): <span class="mono">{{ haltedMachineIds.join(', ') }}</span> — use Fix on the row.
+        </p>
+      }
+      <div class="table event-log safety-table">
+        <div class="table-head event-log-head safety-head-ext">
+          <div class="th">Time</div>
+          <div class="th">Machine</div>
+          <div class="th">Status</div>
+          <div class="th wide">Reason</div>
+          <div class="th narrow">Fix</div>
+        </div>
+        <div class="table-body dashboard-scroll-body scroll-pad">
+          @for (s of safetyResults; track $index) {
+            <div
+              class="tr event-log-row safety-head-ext machine-accent-row"
+              [class.machine-lin]="s.machineId === 'LIN'"
+              [class.machine-cnc]="s.machineId === 'CNC'"
+            >
+              <div class="td mono muted date-cell">{{ s.evaluatedAt | prettyDate }}</div>
+              <div class="td">
+                <span
+                  class="pill pill-machine"
+                  [class.pill-lin]="s.machineId === 'LIN'"
+                  [class.pill-cnc]="s.machineId === 'CNC'"
+                  >{{ s.machineId }}</span>
+              </div>
+              <div class="td">
+                <span class="pill" [class.ok]="s.safe" [class.bad]="!s.safe">
+                  {{ s.safe ? 'SAFE' : 'UNSAFE' }}
+                </span>
+              </div>
+              <div class="td small wide">{{ s.reason }}</div>
+              <div class="td narrow">
+                <button
+                  type="button"
+                  class="btn secondary btn-compact"
+                  [disabled]="!isHalted(s.machineId) || controlsBusy"
+                  (click)="safetyFix.emit(s.machineId)"
+                >
+                  Fix
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,53 @@
+:root {
+  --kb-bg: #0b1220;
+  --kb-text: #e6eefc;
+  --kb-muted: #b7c7e5;
+  --kb-accent: #cfe0ff;
+  --kb-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --kb-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --kb-dashboard-panel-scroll-height: min(35vh, 322px);
+  --kb-results-panel-scroll-height: calc(var(--kb-dashboard-panel-scroll-height) / 2.2);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--kb-bg);
+  color: var(--kb-text);
+  font-size: 12px;
+  font-family: var(--kb-font);
+  scrollbar-color: rgba(124, 58, 237, 0.45) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  margin: 6px 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(45, 108, 223, 0.55), rgba(124, 58, 237, 0.5));
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(45, 108, 223, 0.75), rgba(124, 58, 237, 0.65));
+  background-clip: padding-box;
+}
+
+.scroll-pad {
+  padding: 3px 10px 8px 5px;
+  box-sizing: border-box;
+}

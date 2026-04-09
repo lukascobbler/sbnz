@@ -1,0 +1,51 @@
+<div class="shell">
+  <header class="header">
+    <div class="title">
+      <div class="app-name">{{ title() }}</div>
+      <div class="subtitle">Rule engine dashboard (simulation-driven)</div>
+    </div>
+    <div class="actions header-toolbar" [class.header-toolbar-busy]="controlsBusy()">
+      <rule-catalog-header-btn />
+      <sim-controls
+        [simulatedTime]="simulatedTime()"
+        [tickMinutes]="tickMinutes()"
+        [connected]="connected()"
+        [controlsBusy]="controlsBusy()"
+        (reset)="reset()"
+        (tickStep)="adjustTick($event)"
+        (step)="step()"
+      />
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="card error">{{ error() }}</div>
+  }
+
+  @if (report()) {
+    <div class="dashboard">
+      <div class="grid">
+        <sensors-panel
+          [sensors]="sensors()"
+          [haltedMachineIds]="safetyHaltedMachineIds()"
+          [workloads]="machineWorkloads()"
+          [controlsBusy]="controlsBusy()"
+          (workloadCycle)="cycleWorkload($event)"
+        />
+        <rule-feed [rules]="rulesFiredThisTick()" [tickEndTime]="simulatedTime()" />
+      </div>
+      <results-panel
+        [anomalies]="anomalies()"
+        [interventions]="interventions()"
+        [safetyResults]="safetyResults()"
+        [haltedMachineIds]="safetyHaltedMachineIds()"
+        [controlsBusy]="controlsBusy()"
+        (safetyFix)="safetyFix($event)"
+      />
+    </div>
+  } @else {
+    <div class="card hint">
+      Waiting for stream… If nothing appears, start the backend and refresh.
+    </div>
+  }
+</div>

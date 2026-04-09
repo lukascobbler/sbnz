@@ -1,0 +1,22 @@
+<button type="button" class="info-btn" aria-label="Rule catalog" title="Rule catalog" (click)="open(dlg)">
+  i
+</button>
+<dialog #dlg class="info-dialog catalog-dialog" (click)="onBackdrop($event, dlg)">
+  <div class="dialog-panel catalog-dialog-panel" (click)="$event.stopPropagation()">
+    <h4 class="dialog-title">Rule catalog</h4>
+    <p class="dialog-lead muted">
+      Reference list of rules in the knowledge base (hand-written in rules.drl plus generated threshold rules from
+      templates.drt). It does not change at runtime. Compare with the rule feed, which shows only what fired in the
+      latest tick.
+    </p>
+    <ul class="rules-list rules-list-dialog">
+      @for (r of rules; track r.name) {
+        <li class="rules-list-item">
+          <span class="mono rule-name">{{ r.name }}</span>
+          <span class="rule-desc">{{ r.desc }}</span>
+        </li>
+      }
+    </ul>
+    <button type="button" class="btn secondary" (click)="dlg.close()">Close</button>
+  </div>
+</dialog>

@@ -1,0 +1,26 @@
+<button
+  type="button"
+  class="pill pill-catalog"
+  title="Open rule catalog"
+  aria-label="Open rule catalog"
+  (click)="open(dlg)"
+>
+  ?
+</button>
+<dialog #dlg class="info-dialog catalog-dialog" (click)="onBackdrop($event, dlg)">
+  <div class="dialog-panel catalog-dialog-panel" (click)="$event.stopPropagation()">
+    <h4 class="dialog-title">Rule catalog</h4>
+    @if (ruleName) {
+      <p class="dialog-lead muted">Focused: <span class="mono">{{ ruleName }}</span></p>
+    }
+    <ul class="rules-list rules-list-dialog">
+      @for (r of rules; track r.name) {
+        <li class="rules-list-item" [class.rule-focused]="r.name === ruleName">
+          <span class="mono rule-name">{{ r.name }}</span>
+          <span class="rule-desc">{{ r.desc }}</span>
+        </li>
+      }
+    </ul>
+    <button type="button" class="btn secondary" (click)="dlg.close()">Close</button>
+  </div>
+</dialog>

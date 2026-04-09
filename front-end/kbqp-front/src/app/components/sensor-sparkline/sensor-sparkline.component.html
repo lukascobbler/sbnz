@@ -1,0 +1,28 @@
+<svg
+  class="sparkline"
+  viewBox="0 0 100 36"
+  preserveAspectRatio="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  [attr.aria-label]="label()"
+>
+  <defs>
+    <linearGradient [attr.id]="gradId" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" class="sparkline-fill-stop0" />
+      <stop offset="100%" class="sparkline-fill-stop1" />
+    </linearGradient>
+  </defs>
+  <rect class="sparkline-bg" x="0" y="0" width="100" height="36" rx="4" />
+  @if (linePoints(); as pts) {
+    <polygon class="sparkline-area" [attr.fill]="fillUrl()" [attr.points]="areaPoints()!" />
+    <polyline
+      class="sparkline-line"
+      [attr.points]="pts"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  } @else {
+    <text class="sparkline-empty" x="50" y="20" text-anchor="middle">Collecting…</text>
+  }
+</svg>
