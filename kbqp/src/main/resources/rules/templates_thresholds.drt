@@ -1,32 +1,38 @@
 template header
 ruleName
-machineType
+machineId
 metric
 high
-conditionType
+anomalyType
+description
 
 package rules;
 
 import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.MachineType;
 import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.domain.Condition;
-import com.luka.kbpdm.domain.ConditionType;
+import com.luka.kbpdm.domain.Anomaly;
+import com.luka.kbpdm.domain.AnomalyType;
+import com.luka.kbpdm.domain.SimulatedClock;
 
 dialect "java"
 
-template "threshold-to-condition"
+template "threshold-to-anomaly"
 
 rule "@{ruleName}"
 salience 50
 when
-  $m : Machine( type == MachineType.@{machineType} )
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "@{machineId}" )
   $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.@{metric}, value >= @{high} )
-  not Condition( machineId == $m.machineId, type == ConditionType.@{conditionType} )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.@{anomalyType} )
 then
-  insert(new Condition($m.getMachineId(), ConditionType.@{conditionType}, java.time.Instant.ofEpochMilli($r.getTs())));
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.@{anomalyType},
+      "@{description}",
+      $t
+  ));
 end
 
 end template
-

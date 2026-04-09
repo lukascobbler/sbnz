@@ -5,7 +5,8 @@ import com.luka.kbpdm.api.RuleFiring;
 import com.luka.kbpdm.api.SensorStatus;
 import com.luka.kbpdm.api.SimulationReport;
 import com.luka.kbpdm.domain.*;
-import com.luka.kbpdm.simulation.SimulationConstants;
+import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
 import com.luka.kbpdm.simulation.report.SimulationSnapshotBuilder;
 import com.luka.kbpdm.simulation.rules.RuleMatchModel;
@@ -33,6 +34,7 @@ import static com.luka.kbpdm.simulation.SimulationConstants.*;
 public class SimulationEngine implements DisposableBean {
 
     private final KieContainer kieContainer;
+    private final MachineProcessRegistry machineRegistry;
     private final SimulatedTelemetry telemetry = new SimulatedTelemetry();
 
     @Getter
@@ -49,16 +51,19 @@ public class SimulationEngine implements DisposableBean {
     private final List<RuleFiring> rulesCollectedThisTick = new ArrayList<>();
     private volatile List<RuleFiring> rulesFromLastCompletedTick = List.of();
 
-    private final Map<String, MachineWorkload> workloadByMachine = new HashMap<>();
+    private final Map<String, MachineWorkload> temperatureWorkloadByMachine = new HashMap<>();
+    private final Map<String, MachineWorkload> vibrationWorkloadByMachine = new HashMap<>();
     private final Map<String, Long> tickIndexByMachine = new HashMap<>();
 
     private final List<List<SensorStatus>> sensorTraceThisTick = new ArrayList<>();
 
     public SimulationEngine(
             KieContainer kieContainer,
+            MachineProcessRegistry machineRegistry,
             @Value("${simulation.tickMinutes:30}") long tickMinutes
     ) {
         this.kieContainer = kieContainer;
+        this.machineRegistry = machineRegistry;
         this.tickMinutes = clampTickMinutes(tickMinutes);
         reset();
     }
@@ -74,10 +79,13 @@ public class SimulationEngine implements DisposableBean {
         this.session = kieContainer.newKieSession();
         this.clock = session.getSessionClock();
         this.simulatedTime = SIMULATION_EPOCH;
-        this.workloadByMachine.clear();
+        this.temperatureWorkloadByMachine.clear();
+        this.vibrationWorkloadByMachine.clear();
         this.tickIndexByMachine.clear();
-        this.workloadByMachine.put(MID_LINE, MachineWorkload.NORMAL);
-        this.workloadByMachine.put(MID_CNC, MachineWorkload.NORMAL);
+        for (String id : machineRegistry.machineIdsInOrder()) {
+            this.temperatureWorkloadByMachine.put(id, MachineWorkload.NORMAL);
+            this.vibrationWorkloadByMachine.put(id, MachineWorkload.NORMAL);
+        }
 
         this.sensors.clear();
         telemetry.clearGeneratorState();
@@ -108,14 +116,21 @@ public class SimulationEngine implements DisposableBean {
         broadcastSnapshot();
     }
 
-    public synchronized void setMachineWorkload(String machineId, MachineWorkload workload) {
+    public synchronized void setMachineWorkload(String machineId, MachineWorkload workload, TelemetryMetric metric) {
         if (session == null || workload == null) {
             return;
         }
-        if (!MID_LINE.equals(machineId) && !MID_CNC.equals(machineId)) {
+        if (!machineRegistry.hasMachine(machineId)) {
             return;
         }
-        workloadByMachine.put(machineId, workload);
+        if (metric == null) {
+            temperatureWorkloadByMachine.put(machineId, workload);
+            vibrationWorkloadByMachine.put(machineId, workload);
+        } else if (metric == TelemetryMetric.TEMPERATURE_C) {
+            temperatureWorkloadByMachine.put(machineId, workload);
+        } else if (metric == TelemetryMetric.VIBRATION_RMS) {
+            vibrationWorkloadByMachine.put(machineId, workload);
+        }
         broadcastSnapshot();
     }
 
@@ -138,6 +153,11 @@ public class SimulationEngine implements DisposableBean {
         if (session == null) {
             return;
         }
+        Optional<MachineProcessProfile> profileOpt = machineRegistry.profile(machineId);
+        if (profileOpt.isEmpty()) {
+            return;
+        }
+        MachineProcessProfile profile = profileOpt.get();
         boolean known = false;
         for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
             if (machineId.equals(m.getMachineId())) {
@@ -148,7 +168,6 @@ public class SimulationEngine implements DisposableBean {
         if (!known) {
             return;
         }
-        WorkingMemoryOps.deleteFactsForMachine(session, Condition.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, Anomaly.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, Intervention.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, UnsafeReason.class, machineId);
@@ -160,9 +179,10 @@ public class SimulationEngine implements DisposableBean {
         telemetry.removeKeysStartingWith(machineId + ":");
         tickIndexByMachine.remove(machineId);
 
-        restoreComponentStatusAfterOperatorFix(machineId);
-        telemetry.resetToNominal(sensors, simulatedTime, machineId);
-        workloadByMachine.put(machineId, MachineWorkload.NORMAL);
+        restoreComponentStatusAfterOperatorFix(profile);
+        telemetry.resetToNominal(sensors, simulatedTime, profile);
+        temperatureWorkloadByMachine.put(machineId, MachineWorkload.NORMAL);
+        vibrationWorkloadByMachine.put(machineId, MachineWorkload.NORMAL);
 
         refreshSimulatedClock();
         rulesCollectedThisTick.clear();
@@ -192,9 +212,9 @@ public class SimulationEngine implements DisposableBean {
                 simulatedTime,
                 session,
                 sensors,
-                workloadByMachine,
-                MID_LINE,
-                MID_CNC,
+                temperatureWorkloadByMachine,
+                vibrationWorkloadByMachine,
+                machineRegistry.machineIdsInOrder(),
                 sensorTraceThisTick,
                 rulesFromLastCompletedTick
         );
@@ -239,7 +259,18 @@ public class SimulationEngine implements DisposableBean {
             WorkingMemoryOps.pruneOldTelemetryAndTicks(session, cutoff);
 
             for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
-                telemetry.generateStep(session, sensors, halted, workloadByMachine, simulatedTime, m);
+                String mid = m.getMachineId();
+                machineRegistry.profile(mid).ifPresent(p ->
+                        telemetry.generateStep(
+                                session,
+                                sensors,
+                                halted,
+                                temperatureWorkloadByMachine,
+                                vibrationWorkloadByMachine,
+                                simulatedTime,
+                                p
+                        )
+                );
             }
 
             for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
@@ -275,12 +306,14 @@ public class SimulationEngine implements DisposableBean {
             if (haltedMachineIds.contains(id)) {
                 continue;
             }
-            boolean bearing = hasBearingFailureAnomaly(id);
             double temp = latestSensorValueOrNaN(id, TelemetryMetric.TEMPERATURE_C);
             double vib = latestSensorValueOrNaN(id, TelemetryMetric.VIBRATION_RMS);
+            boolean stress = machineRegistry.profile(id)
+                    .map(p -> p.sustainedStressBandActive(temp, vib))
+                    .orElse(false);
             long idx = tickIndexByMachine.getOrDefault(id, 0L) + 1L;
             tickIndexByMachine.put(id, idx);
-            session.insert(new TickStatus(id, bearing, temp, vib, idx, simulatedTime.toEpochMilli()));
+            session.insert(new TickStatus(id, stress, temp, vib, idx, simulatedTime.toEpochMilli()));
         }
     }
 
@@ -292,63 +325,35 @@ public class SimulationEngine implements DisposableBean {
         return s.getValue();
     }
 
-    private boolean hasBearingFailureAnomaly(String machineId) {
-        for (Anomaly a : WorkingMemoryOps.getFacts(session, Anomaly.class)) {
-            if (machineId.equals(a.getMachineId()) && a.getType() == AnomalyType.POTENTIAL_BEARING_FAILURE) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void refreshSimulatedClock() {
         WorkingMemoryOps.deleteFactsOfType(session, SimulatedClock.class);
         session.insert(new SimulatedClock(simulatedTime));
     }
 
     private void seedFacts() {
-        session.insert(new Machine(MID_LINE, "Line", MachineType.CONVEYOR));
-        session.insert(new Machine(MID_CNC, "CNC", MachineType.CNC));
-        insertInitialComponentStatuses();
+        for (MachineProcessProfile p : machineRegistry.profilesInOrder()) {
+            session.insert(new Machine(p.machineId(), p.displayName(), p.machineType()));
+            session.insert(new ComponentStatus(
+                    p.machineId(),
+                    p.componentType(),
+                    HealthStatus.OK,
+                    simulatedTime.minus(p.componentAgeAtStart()),
+                    p.serviceInterval()
+            ));
+        }
         session.insert(new SimulatedClock(simulatedTime));
     }
 
-    private void insertInitialComponentStatuses() {
-        session.insert(new ComponentStatus(
-                MID_LINE,
-                ComponentType.BEARING,
-                HealthStatus.OK,
-                simulatedTime.minus(Duration.ofDays(25)),
-                Duration.ofDays(30)
-        ));
-        session.insert(new ComponentStatus(
-                MID_CNC,
-                ComponentType.MOTOR,
-                HealthStatus.OK,
-                simulatedTime.minus(Duration.ofDays(10)),
-                Duration.ofDays(90)
-        ));
-    }
-
-    private void restoreComponentStatusAfterOperatorFix(String machineId) {
+    private void restoreComponentStatusAfterOperatorFix(MachineProcessProfile profile) {
+        String machineId = profile.machineId();
         WorkingMemoryOps.deleteFactsForMachine(session, ComponentStatus.class, machineId);
-        if (MID_LINE.equals(machineId)) {
-            session.insert(new ComponentStatus(
-                    MID_LINE,
-                    ComponentType.BEARING,
-                    HealthStatus.OK,
-                    simulatedTime,
-                    Duration.ofDays(30)
-            ));
-        } else if (MID_CNC.equals(machineId)) {
-            session.insert(new ComponentStatus(
-                    MID_CNC,
-                    ComponentType.MOTOR,
-                    HealthStatus.OK,
-                    simulatedTime,
-                    Duration.ofDays(90)
-            ));
-        }
+        session.insert(new ComponentStatus(
+                machineId,
+                profile.componentType(),
+                HealthStatus.OK,
+                simulatedTime,
+                profile.serviceInterval()
+        ));
     }
 
     @Override

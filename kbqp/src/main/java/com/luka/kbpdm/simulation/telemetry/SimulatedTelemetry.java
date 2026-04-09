@@ -2,10 +2,9 @@ package com.luka.kbpdm.simulation.telemetry;
 
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SensorStatus;
-import com.luka.kbpdm.domain.Machine;
 import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.simulation.SimulationConstants;
+import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import org.kie.api.runtime.KieSession;
 
 import java.time.Instant;
@@ -37,37 +36,47 @@ public final class SimulatedTelemetry {
             KieSession session,
             Map<String, SensorStatus> sensors,
             Set<String> haltedMachineIds,
-            Map<String, MachineWorkload> workloadByMachine,
+            Map<String, MachineWorkload> temperatureWorkloadByMachine,
+            Map<String, MachineWorkload> vibrationWorkloadByMachine,
             Instant simulatedTime,
-            Machine m
+            MachineProcessProfile profile
     ) {
-        String id = m.getMachineId();
-        if (id == null) {
-            return;
-        }
+        String id = profile.machineId();
         if (haltedMachineIds.contains(id)) {
             return;
         }
-        if (SimulationConstants.MID_LINE.equals(id)) {
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.TEMPERATURE_C, SimulationConstants.LIN_TEMP_NOMINAL, 0.55, 70.0);
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.VIBRATION_RMS, SimulationConstants.LIN_VIB_NOMINAL, 0.09, 4.0);
-        } else if (SimulationConstants.MID_CNC.equals(id)) {
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.TEMPERATURE_C, SimulationConstants.CNC_TEMP_NOMINAL, 0.28, 80.0);
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.VIBRATION_RMS, SimulationConstants.CNC_VIB_NOMINAL, 0.07, 5.0);
-        } else {
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.TEMPERATURE_C, 55.0, 0.22, 75.0);
-            generateFor(session, sensors, workloadByMachine, simulatedTime, id, TelemetryMetric.VIBRATION_RMS, 3.2, 0.06, 4.5);
-        }
+        generateFor(
+                session,
+                sensors,
+                temperatureWorkloadByMachine,
+                simulatedTime,
+                id,
+                TelemetryMetric.TEMPERATURE_C,
+                profile.tempNominalC(),
+                profile.tempCreepScale(),
+                profile.telemetryTempThresholdHint()
+        );
+        generateFor(
+                session,
+                sensors,
+                vibrationWorkloadByMachine,
+                simulatedTime,
+                id,
+                TelemetryMetric.VIBRATION_RMS,
+                profile.vibNominalRms(),
+                profile.vibCreepScale(),
+                profile.telemetryVibThresholdHint()
+        );
     }
 
-    public void resetToNominal(Map<String, SensorStatus> sensors, Instant simulatedTime, String machineId) {
-        if (SimulationConstants.MID_LINE.equals(machineId)) {
-            putPair(sensors, simulatedTime, machineId, SimulationConstants.LIN_TEMP_NOMINAL, SimulationConstants.LIN_VIB_NOMINAL);
-            return;
-        }
-        if (SimulationConstants.MID_CNC.equals(machineId)) {
-            putPair(sensors, simulatedTime, machineId, SimulationConstants.CNC_TEMP_NOMINAL, SimulationConstants.CNC_VIB_NOMINAL);
-        }
+    public void resetToNominal(Map<String, SensorStatus> sensors, Instant simulatedTime, MachineProcessProfile profile) {
+        putPair(
+                sensors,
+                simulatedTime,
+                profile.machineId(),
+                profile.tempNominalC(),
+                profile.vibNominalRms()
+        );
     }
 
     private void putPair(
@@ -99,7 +108,7 @@ public final class SimulatedTelemetry {
     private void generateFor(
             KieSession session,
             Map<String, SensorStatus> sensors,
-            Map<String, MachineWorkload> workloadByMachine,
+            Map<String, MachineWorkload> workloadByMetric,
             Instant simulatedTime,
             String machineId,
             TelemetryMetric metric,
@@ -107,7 +116,7 @@ public final class SimulatedTelemetry {
             double creepScale,
             double thresholdHint
     ) {
-        MachineWorkload w = workloadByMachine.getOrDefault(machineId, MachineWorkload.NORMAL);
+        MachineWorkload w = workloadByMetric.getOrDefault(machineId, MachineWorkload.NORMAL);
         String key = machineId + ":" + metric.name();
         double prev = generatorState.getOrDefault(key, nominal);
 

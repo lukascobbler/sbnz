@@ -1,5 +1,7 @@
 export type MachineWorkload = 'NORMAL' | 'OVERWORKED' | 'REST';
 
+export type TelemetryMetricKey = 'TEMPERATURE_C' | 'VIBRATION_RMS';
+
 export interface RuleFiring {
   ruleName: string;
   machineId: string | null;
@@ -39,7 +41,8 @@ export interface SimulationReport {
   simulatedTime: string;
   tickMinutes: number;
   safetyHaltedMachineIds?: string[];
-  machineWorkloads?: Record<string, MachineWorkload>;
+  machineTemperatureWorkloads?: Record<string, MachineWorkload>;
+  machineVibrationWorkloads?: Record<string, MachineWorkload>;
   rulesFiredThisTick: RuleFiring[];
 
   sensors: SensorStatus[];

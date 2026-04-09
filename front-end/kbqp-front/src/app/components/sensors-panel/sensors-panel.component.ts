@@ -10,11 +10,16 @@ import {
   signal,
   SimpleChanges,
 } from '@angular/core';
-import { MachineWorkload, SensorStatus } from '../../models/simulation.types';
+import { MachineWorkload, SensorStatus, TelemetryMetricKey } from '../../models/simulation.types';
 import { PrettyDatePipe } from '../../pipes/pretty-date.pipe';
 import { InfoDialogButtonComponent } from '../info-dialog-button/info-dialog-button.component';
 import { SensorHistoryService } from '../../services/sensor-history.service';
 import { SensorSparklineComponent } from '../sensor-sparkline/sensor-sparkline.component';
+
+export interface WorkloadCyclePayload {
+  machineId: string;
+  metric: TelemetryMetricKey;
+}
 
 interface SensorGroup {
   machineId: string;
@@ -37,13 +42,15 @@ export class SensorsPanelComponent implements OnChanges {
 
   @Input({ required: true }) sensors: SensorStatus[] = [];
   @Input() haltedMachineIds: string[] = [];
-  @Input() workloads: Record<string, MachineWorkload> = {};
+  @Input() temperatureWorkloads: Record<string, MachineWorkload> = {};
+  @Input() vibrationWorkloads: Record<string, MachineWorkload> = {};
   @Input() controlsBusy = false;
-  @Output() workloadCycle = new EventEmitter<string>();
+  @Output() workloadCycle = new EventEmitter<WorkloadCyclePayload>();
 
   private readonly sensorsSig = signal<SensorStatus[]>([]);
   private readonly haltedSig = signal<string[]>([]);
-  private readonly workloadsSig = signal<Record<string, MachineWorkload>>({});
+  private readonly temperatureWorkloadsSig = signal<Record<string, MachineWorkload>>({});
+  private readonly vibrationWorkloadsSig = signal<Record<string, MachineWorkload>>({});
 
   protected readonly groups = computed((): SensorGroup[] => {
     void this.sensorHistory.series();
@@ -67,30 +74,39 @@ export class SensorsPanelComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['sensors']) this.sensorsSig.set(this.sensors);
     if (changes['haltedMachineIds']) this.haltedSig.set(this.haltedMachineIds ?? []);
-    if (changes['workloads']) this.workloadsSig.set(this.workloads ?? {});
+    if (changes['temperatureWorkloads']) this.temperatureWorkloadsSig.set(this.temperatureWorkloads ?? {});
+    if (changes['vibrationWorkloads']) this.vibrationWorkloadsSig.set(this.vibrationWorkloads ?? {});
   }
 
   isHalted(machineId: string): boolean {
     return this.haltedSig().includes(machineId);
   }
 
-  workloadOf(machineId: string): MachineWorkload {
-    return this.workloadsSig()[machineId] ?? 'NORMAL';
+  temperatureWorkloadOf(machineId: string): MachineWorkload {
+    return this.temperatureWorkloadsSig()[machineId] ?? 'NORMAL';
   }
 
-  workloadLabel(machineId: string): string {
-    switch (this.workloadOf(machineId)) {
+  vibrationWorkloadOf(machineId: string): MachineWorkload {
+    return this.vibrationWorkloadsSig()[machineId] ?? 'NORMAL';
+  }
+
+  workloadLabel(w: MachineWorkload): string {
+    switch (w) {
       case 'OVERWORKED':
-        return 'Overworked';
+        return '↑ Overworked';
       case 'REST':
-        return 'Rest';
+        return '↓ Rest';
       default:
-        return 'Normal';
+        return '→ Normal';
     }
   }
 
-  workloadTitle(_machineId: string): string {
-    return 'Workload: click to cycle Normal → Overworked → Rest';
+  temperatureTitle(): string {
+    return 'Temperature driver: cycle Normal → Overworked → Rest (affects °C only)';
+  }
+
+  vibrationTitle(): string {
+    return 'Vibration driver: cycle Normal → Overworked → Rest (affects RMS only)';
   }
 
   machineGroupClass(slug: string): string {

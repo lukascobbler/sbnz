@@ -6,6 +6,7 @@ import { RuleFeedComponent } from './components/rule-feed/rule-feed.component';
 import { ResultsPanelComponent } from './components/results-panel/results-panel.component';
 import { RuleCatalogHeaderComponent } from './components/rule-catalog-header/rule-catalog-header.component';
 import { MachineWorkload } from './models/simulation.types';
+import { WorkloadCyclePayload } from './components/sensors-panel/sensors-panel.component';
 import { SimulationService } from './services/simulation.service';
 import { SensorHistoryService } from './services/sensor-history.service';
 
@@ -38,7 +39,12 @@ export class App {
   protected readonly simulatedTime = computed(() => this.report()?.simulatedTime ?? null);
   protected readonly rulesFiredThisTick = computed(() => this.report()?.rulesFiredThisTick ?? []);
   protected readonly safetyHaltedMachineIds = computed(() => this.report()?.safetyHaltedMachineIds ?? []);
-  protected readonly machineWorkloads = computed(() => this.report()?.machineWorkloads ?? {});
+  protected readonly machineTemperatureWorkloads = computed(
+    () => this.report()?.machineTemperatureWorkloads ?? {},
+  );
+  protected readonly machineVibrationWorkloads = computed(
+    () => this.report()?.machineVibrationWorkloads ?? {},
+  );
 
   private readonly pendingHttp = signal(0);
   protected readonly controlsBusy = computed(() => this.pendingHttp() > 0);
@@ -92,14 +98,17 @@ export class App {
     });
   }
 
-  protected cycleWorkload(machineId: string) {
+  protected cycleWorkload(payload: WorkloadCyclePayload) {
     if (this.controlsBusy()) return;
-    const w = this.machineWorkloads()[machineId] ?? 'NORMAL';
+    const { machineId, metric } = payload;
+    const map =
+      metric === 'TEMPERATURE_C' ? this.machineTemperatureWorkloads() : this.machineVibrationWorkloads();
+    const w = map[machineId] ?? 'NORMAL';
     let idx = App.WORKLOAD_ORDER.indexOf(w);
     if (idx < 0) idx = 0;
     const next = App.WORKLOAD_ORDER[(idx + 1) % App.WORKLOAD_ORDER.length];
     this.error.set(null);
-    this.trackHttp(this.sim.setWorkload(machineId, next)).subscribe({
+    this.trackHttp(this.sim.setWorkload(machineId, next, metric)).subscribe({
       next: (r) => this.sim.ingestReport(r),
       error: () => this.error.set('Workload update failed'),
     });

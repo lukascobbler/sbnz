@@ -1,70 +1,74 @@
 package rules;
 import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.MachineType;
 import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.domain.Condition;
-import com.luka.kbpdm.domain.ConditionType;
+import com.luka.kbpdm.domain.Anomaly;
+import com.luka.kbpdm.domain.AnomalyType;
+import com.luka.kbpdm.domain.SimulatedClock;
 dialect "java"
+
+rule "Threshold: LIN high temperature"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "LIN" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.TEMPERATURE_C, value >= 86.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.TEMPERATURE_ABOVE_THRESHOLD )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.TEMPERATURE_ABOVE_THRESHOLD,
+      "Temperature reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
+
+rule "Threshold: LIN high vibration"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "LIN" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.VIBRATION_RMS, value >= 4.4 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.VIBRATION_ABOVE_THRESHOLD )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.VIBRATION_ABOVE_THRESHOLD,
+      "Vibration reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
 
 rule "Threshold: CNC high temperature"
 salience 50
 when
-  $m : Machine( type == MachineType.CNC )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.TEMPERATURE_C, value >= 80.0 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_TEMPERATURE )
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "CNC" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.TEMPERATURE_C, value >= 78.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.TEMPERATURE_ABOVE_THRESHOLD )
 then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_TEMPERATURE, java.time.Instant.ofEpochMilli($r.getTs())));
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.TEMPERATURE_ABOVE_THRESHOLD,
+      "Temperature reached or exceeded the configured high band for this machine.",
+      $t
+  ));
 end
 
 rule "Threshold: CNC high vibration"
 salience 50
 when
-  $m : Machine( type == MachineType.CNC )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.VIBRATION_RMS, value >= 5.0 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_VIBRATION )
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "CNC" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.VIBRATION_RMS, value >= 5.9 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.VIBRATION_ABOVE_THRESHOLD )
 then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_VIBRATION, java.time.Instant.ofEpochMilli($r.getTs())));
-end
-
-rule "Threshold: Conveyor high temperature"
-salience 50
-when
-  $m : Machine( type == MachineType.CONVEYOR )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.TEMPERATURE_C, value >= 70.0 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_TEMPERATURE )
-then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_TEMPERATURE, java.time.Instant.ofEpochMilli($r.getTs())));
-end
-
-rule "Threshold: Conveyor high vibration"
-salience 50
-when
-  $m : Machine( type == MachineType.CONVEYOR )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.VIBRATION_RMS, value >= 4.0 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_VIBRATION )
-then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_VIBRATION, java.time.Instant.ofEpochMilli($r.getTs())));
-end
-
-rule "Threshold: Press high temperature"
-salience 50
-when
-  $m : Machine( type == MachineType.PRESS )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.TEMPERATURE_C, value >= 75.0 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_TEMPERATURE )
-then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_TEMPERATURE, java.time.Instant.ofEpochMilli($r.getTs())));
-end
-
-rule "Threshold: Press high vibration"
-salience 50
-when
-  $m : Machine( type == MachineType.PRESS )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.VIBRATION_RMS, value >= 4.5 )
-  not Condition( machineId == $m.machineId, type == ConditionType.HIGH_VIBRATION )
-then
-  insert(new Condition($m.getMachineId(), ConditionType.HIGH_VIBRATION, java.time.Instant.ofEpochMilli($r.getTs())));
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.VIBRATION_ABOVE_THRESHOLD,
+      "Vibration reached or exceeded the configured high band for this machine.",
+      $t
+  ));
 end
 
 

@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TickStatus {
     private String machineId;
-    private boolean bearingFailurePresent;
+    private boolean sustainedStressPresent;
     private double temperatureC;
     private double vibrationRms;
     private long tickIndex;
     private long ts;
 }
-

@@ -1,8 +1,8 @@
 package com.luka.kbpdm.domain;
 
 public enum AnomalyType {
-    POTENTIAL_BEARING_FAILURE,
+    TEMPERATURE_ABOVE_THRESHOLD,
+    VIBRATION_ABOVE_THRESHOLD,
     TEMPERATURE_RISING_TREND,
     VIBRATION_RISING_TREND
 }
-

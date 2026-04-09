@@ -58,9 +58,6 @@ public final class RuleMatchModel {
             String v = String.format(Locale.ROOT, "%.2f", r.getValue());
             return "Reading(" + r.getMetric() + "=" + v + ")";
         }
-        if (o instanceof Condition c) {
-            return "Condition(" + c.getType() + ")";
-        }
         if (o instanceof Anomaly a) {
             return "Anomaly(" + a.getType() + ")";
         }
@@ -80,7 +77,7 @@ public final class RuleMatchModel {
             return s.isSafe() ? "SAFE" : "UNSAFE";
         }
         if (o instanceof TickStatus t) {
-            return t.isBearingFailurePresent() ? "Tick(bearing)" : "Tick(ok)";
+            return t.isSustainedStressPresent() ? "Tick(stress)" : "Tick(ok)";
         }
         if (o instanceof MachineHalted) {
             return "HALTED";
@@ -94,9 +91,6 @@ public final class RuleMatchModel {
         }
         if (o instanceof TelemetryReading r) {
             return r.getMachineId();
-        }
-        if (o instanceof Condition c) {
-            return c.getMachineId();
         }
         if (o instanceof Anomaly a) {
             return a.getMachineId();

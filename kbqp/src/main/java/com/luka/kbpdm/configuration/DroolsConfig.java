@@ -1,8 +1,9 @@
 package com.luka.kbpdm.configuration;
 
-import com.luka.kbpdm.domain.MachineType;
-import com.luka.kbpdm.domain.ConditionType;
+import com.luka.kbpdm.domain.AnomalyType;
 import com.luka.kbpdm.domain.TelemetryMetric;
+import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
 import org.drools.template.DataProviderCompiler;
 import org.drools.template.objects.ArrayDataProvider;
 import org.kie.api.KieServices;
@@ -24,6 +25,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Configuration
@@ -38,7 +41,7 @@ public class DroolsConfig {
     private static final String GENERATED_TRENDS_DEV_PATH = "src/main/resources/rules/generated_trends.drl";
 
     @Bean
-    public KieContainer kieContainer() {
+    public KieContainer kieContainer(MachineProcessRegistry machineProcessRegistry) {
         KieServices kieServices = KieServices.Factory.get();
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
 
@@ -57,21 +60,33 @@ public class DroolsConfig {
         kieFileSystem.writeKModuleXML(moduleModel.toXML());
         kieFileSystem.write(kieServices.getResources().newClassPathResource(RULES_PATH));
 
-        String[][] templateRows = new String[][]{
-                {"Threshold: CNC high temperature", MachineType.CNC.name(), TelemetryMetric.TEMPERATURE_C.name(), "80.0", ConditionType.HIGH_TEMPERATURE.name()},
-                {"Threshold: CNC high vibration", MachineType.CNC.name(), TelemetryMetric.VIBRATION_RMS.name(), "5.0", ConditionType.HIGH_VIBRATION.name()},
-                {"Threshold: Conveyor high temperature", MachineType.CONVEYOR.name(), TelemetryMetric.TEMPERATURE_C.name(), "70.0", ConditionType.HIGH_TEMPERATURE.name()},
-                {"Threshold: Conveyor high vibration", MachineType.CONVEYOR.name(), TelemetryMetric.VIBRATION_RMS.name(), "4.0", ConditionType.HIGH_VIBRATION.name()},
-                {"Threshold: Press high temperature", MachineType.PRESS.name(), TelemetryMetric.TEMPERATURE_C.name(), "75.0", ConditionType.HIGH_TEMPERATURE.name()},
-                {"Threshold: Press high vibration", MachineType.PRESS.name(), TelemetryMetric.VIBRATION_RMS.name(), "4.5", ConditionType.HIGH_VIBRATION.name()},
-        };
+        List<String[]> templateRows = new ArrayList<>();
+        for (MachineProcessProfile p : machineProcessRegistry.profilesInOrder()) {
+            templateRows.add(new String[]{
+                    "Threshold: " + p.machineId() + " high temperature",
+                    p.machineId(),
+                    TelemetryMetric.TEMPERATURE_C.name(),
+                    Double.toString(p.tempAnomalyThresholdC()),
+                    AnomalyType.TEMPERATURE_ABOVE_THRESHOLD.name(),
+                    "Temperature reached or exceeded the configured high band for this machine."
+            });
+            templateRows.add(new String[]{
+                    "Threshold: " + p.machineId() + " high vibration",
+                    p.machineId(),
+                    TelemetryMetric.VIBRATION_RMS.name(),
+                    Double.toString(p.vibAnomalyThresholdRms()),
+                    AnomalyType.VIBRATION_ABOVE_THRESHOLD.name(),
+                    "Vibration reached or exceeded the configured high band for this machine."
+            });
+        }
 
         DataProviderCompiler compiler = new DataProviderCompiler();
         InputStream templateStream = getClass().getResourceAsStream("/" + TEMPLATE_PATH);
         if (templateStream == null) {
             throw new IllegalStateException("Missing rule template on classpath: " + TEMPLATE_PATH);
         }
-        String compiledDrl = compiler.compile(new ArrayDataProvider(templateRows), templateStream);
+        String[][] rows = templateRows.toArray(new String[0][]);
+        String compiledDrl = compiler.compile(new ArrayDataProvider(rows), templateStream);
 
         kieFileSystem.write(
                 kieServices.getResources()

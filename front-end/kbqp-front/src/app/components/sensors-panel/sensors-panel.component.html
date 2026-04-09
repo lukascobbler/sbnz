@@ -2,7 +2,7 @@
   <aside class="panel-side">
     <info-dialog-btn
       title="Sensors & trends"
-      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). One chart point per simulated 30 min sub-step: a single Step of 150 min adds five points. Workload (click to cycle): Normal — drift around nominal; Overworked — worsen only; Rest — eases toward nominal. Halted machines keep last readings until Fix. Reset clears charts."
+      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). One chart point per simulated 30 min sub-step. Two drivers per machine: temperature (°C) and vibration (RMS) each cycle Normal → Overworked → Rest independently (arrow hints: → normal drift, ↑ worsens that signal only, ↓ eases toward nominal). Halt uses a lower stress band: 5 consecutive sub-steps where temperature OR vibration exceeds that band. Halted machines keep last readings until Fix. Reset clears charts."
     />
   </aside>
   <div class="panel-content">
@@ -21,18 +21,34 @@
           <div class="sensor-group" [class]="machineGroupClass(g.slug)">
             <div class="sensor-group-head">
               <span class="tag">{{ g.machineId }}</span>
-              <button
-                type="button"
-                class="btn secondary workload-btn"
-                [class.workload-state-normal]="workloadOf(g.machineId) === 'NORMAL'"
-                [class.workload-state-overworked]="workloadOf(g.machineId) === 'OVERWORKED'"
-                [class.workload-state-rest]="workloadOf(g.machineId) === 'REST'"
-                [title]="workloadTitle(g.machineId)"
-                [disabled]="controlsBusy"
-                (click)="workloadCycle.emit(g.machineId)"
-              >
-                {{ workloadLabel(g.machineId) }}
-              </button>
+              <div class="workload-drivers">
+                <button
+                  type="button"
+                  class="btn secondary workload-btn workload-btn-metric"
+                  [class.workload-state-normal]="temperatureWorkloadOf(g.machineId) === 'NORMAL'"
+                  [class.workload-state-overworked]="temperatureWorkloadOf(g.machineId) === 'OVERWORKED'"
+                  [class.workload-state-rest]="temperatureWorkloadOf(g.machineId) === 'REST'"
+                  [title]="temperatureTitle()"
+                  [disabled]="controlsBusy"
+                  (click)="workloadCycle.emit({ machineId: g.machineId, metric: 'TEMPERATURE_C' })"
+                >
+                  <span class="workload-metric-label">°C</span>
+                  {{ workloadLabel(temperatureWorkloadOf(g.machineId)) }}
+                </button>
+                <button
+                  type="button"
+                  class="btn secondary workload-btn workload-btn-metric"
+                  [class.workload-state-normal]="vibrationWorkloadOf(g.machineId) === 'NORMAL'"
+                  [class.workload-state-overworked]="vibrationWorkloadOf(g.machineId) === 'OVERWORKED'"
+                  [class.workload-state-rest]="vibrationWorkloadOf(g.machineId) === 'REST'"
+                  [title]="vibrationTitle()"
+                  [disabled]="controlsBusy"
+                  (click)="workloadCycle.emit({ machineId: g.machineId, metric: 'VIBRATION_RMS' })"
+                >
+                  <span class="workload-metric-label">RMS</span>
+                  {{ workloadLabel(vibrationWorkloadOf(g.machineId)) }}
+                </button>
+              </div>
               @if (isHalted(g.machineId)) {
                 <span class="pill warn tag-halted">halted</span>
               }

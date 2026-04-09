@@ -63,9 +63,6 @@ public final class WorkingMemoryOps {
         if (o instanceof TelemetryReading r) {
             return r.getMachineId();
         }
-        if (o instanceof Condition c) {
-            return c.getMachineId();
-        }
         if (o instanceof TickStatus t) {
             return t.getMachineId();
         }

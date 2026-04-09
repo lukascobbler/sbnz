@@ -96,7 +96,7 @@
     <aside class="panel-side">
       <info-dialog-btn
         title="Safety"
-        body="UNSAFE only when a machine is halted: after POTENTIAL_BEARING_FAILURE is present for 5 consecutive simulation sub-steps, the engine inserts CRITICAL intervention, sets component HealthStatus.FAIL, and halts telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
+        body="UNSAFE when a machine is halted: the halt rule fires after 5 consecutive sub-steps where simulated temperature OR vibration stays in a sustained stress band (lower thresholds than the high-band anomalies). The rule inserts CRITICAL intervention, sets component HealthStatus.FAIL, and stops telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
       />
     </aside>
     <div class="panel-content">

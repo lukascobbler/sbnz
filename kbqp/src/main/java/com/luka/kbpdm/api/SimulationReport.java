@@ -22,7 +22,8 @@ public class SimulationReport {
 
     private List<String> safetyHaltedMachineIds = new ArrayList<>();
 
-    private Map<String, MachineWorkload> machineWorkloads = new LinkedHashMap<>();
+    private Map<String, MachineWorkload> machineTemperatureWorkloads = new LinkedHashMap<>();
+    private Map<String, MachineWorkload> machineVibrationWorkloads = new LinkedHashMap<>();
 
     private List<RuleFiring> rulesFiredThisTick = new ArrayList<>();
 
@@ -30,7 +31,6 @@ public class SimulationReport {
     private List<TelemetryReading> telemetry = new ArrayList<>();
     private List<SensorStatus> sensors = new ArrayList<>();
     private List<List<SensorStatus>> sensorSnapshotsThisTick = new ArrayList<>();
-    private List<Condition> conditions = new ArrayList<>();
     private List<Anomaly> anomalies = new ArrayList<>();
     private List<Intervention> interventions = new ArrayList<>();
 

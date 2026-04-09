@@ -2,32 +2,20 @@ import { RuleCatalogEntry } from './rule-catalog.model';
 
 export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
   {
+    name: 'Threshold: LIN high temperature',
+    desc: 'Level 1 (template, per machineId from MachineProcessRegistry): LIN + TEMPERATURE_C ≥ profile anomaly threshold → TEMPERATURE_ABOVE_THRESHOLD Anomaly. Thresholds are generated from the same profile as telemetry.',
+  },
+  {
+    name: 'Threshold: LIN high vibration',
+    desc: 'Level 1: LIN + VIBRATION_RMS ≥ profile anomaly threshold → VIBRATION_ABOVE_THRESHOLD Anomaly.',
+  },
+  {
     name: 'Threshold: CNC high temperature',
-    desc: 'Level 1 (template): if a CNC machine’s latest TEMPERATURE_C reading ≥ 80, insert HIGH_TEMPERATURE Condition for that machine (once per state).',
+    desc: 'Level 1: CNC + TEMPERATURE_C ≥ profile anomaly threshold → TEMPERATURE_ABOVE_THRESHOLD Anomaly.',
   },
   {
     name: 'Threshold: CNC high vibration',
-    desc: 'Level 1 (template): CNC + VIBRATION_RMS ≥ 5.0 → HIGH_VIBRATION Condition.',
-  },
-  {
-    name: 'Threshold: Conveyor high temperature',
-    desc: 'Level 1 (template): Conveyor (LIN) + TEMPERATURE_C ≥ 70 → HIGH_TEMPERATURE Condition.',
-  },
-  {
-    name: 'Threshold: Conveyor high vibration',
-    desc: 'Level 1 (template): Conveyor + VIBRATION_RMS ≥ 4.0 → HIGH_VIBRATION Condition.',
-  },
-  {
-    name: 'Threshold: Press high temperature',
-    desc: 'Level 1 (template): Press type + TEMPERATURE_C ≥ 75 → HIGH_TEMPERATURE (no Press machine in current sim, but rule exists in KB).',
-  },
-  {
-    name: 'Threshold: Press high vibration',
-    desc: 'Level 1 (template): Press + VIBRATION_RMS ≥ 4.5 → HIGH_VIBRATION.',
-  },
-  {
-    name: 'L2: Potential bearing failure anomaly',
-    desc: 'Level 2: same machine has both HIGH_TEMPERATURE and HIGH_VIBRATION Conditions, and no existing bearing-failure Anomaly → insert POTENTIAL_BEARING_FAILURE Anomaly (timestamp = simulated clock). Applies to all machines (LIN and CNC).',
+    desc: 'Level 1: CNC + VIBRATION_RMS ≥ profile anomaly threshold → VIBRATION_ABOVE_THRESHOLD Anomaly.',
   },
   {
     name: 'CEP: Temperature rising trend',
@@ -46,8 +34,8 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     desc: 'Level 2: only when VIBRATION_RISING_TREND exists; 5 strict decreases on vibration RMS ending at latest tick → delete that anomaly.',
   },
   {
-    name: 'Simulation: bearing streak & CRITICAL intervention',
-    desc: 'Engine (not DRL): counts consecutive sub-steps with POTENTIAL_BEARING_FAILURE; at 5, halts the machine, sets ComponentStatus to HealthStatus.FAIL, inserts CRITICAL intervention if missing.',
+    name: 'Halt: 5 consecutive ticks in thermal or vibration stress band (OR)',
+    desc: 'Level 2 (TickStatus stream, engine-flagged from MachineProcessProfile): sustainedStressPresent when temp ≥ profile stress OR vib ≥ profile stress. Current defaults: LIN 78°C / 3.85 RMS; CNC 67.5°C / 5.35 RMS (each strictly above NORMAL drift envelope, below anomaly thresholds). Five consecutive ticks → halt + CRITICAL.',
   },
   {
     name: 'Safety: operator halt required',

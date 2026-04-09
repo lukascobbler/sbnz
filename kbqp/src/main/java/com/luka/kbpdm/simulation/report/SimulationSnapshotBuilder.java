@@ -20,9 +20,9 @@ public final class SimulationSnapshotBuilder {
             Instant simulatedTime,
             KieSession session,
             Map<String, SensorStatus> sensors,
-            Map<String, MachineWorkload> workloadByMachine,
-            String midLine,
-            String midCnc,
+            Map<String, MachineWorkload> temperatureWorkloadByMachine,
+            Map<String, MachineWorkload> vibrationWorkloadByMachine,
+            List<String> machineIdsOrdered,
             List<List<SensorStatus>> sensorTraceThisTick,
             List<RuleFiring> rulesFromLastCompletedTick
     ) {
@@ -31,10 +31,14 @@ public final class SimulationSnapshotBuilder {
         r.setSimulatedTime(simulatedTime);
         r.setSafetyHaltedMachineIds(new ArrayList<>(WorkingMemoryOps.haltedMachineIds(session)));
 
-        Map<String, MachineWorkload> wl = new LinkedHashMap<>();
-        wl.put(midLine, workloadByMachine.getOrDefault(midLine, MachineWorkload.NORMAL));
-        wl.put(midCnc, workloadByMachine.getOrDefault(midCnc, MachineWorkload.NORMAL));
-        r.setMachineWorkloads(wl);
+        Map<String, MachineWorkload> tw = new LinkedHashMap<>();
+        Map<String, MachineWorkload> vw = new LinkedHashMap<>();
+        for (String id : machineIdsOrdered) {
+            tw.put(id, temperatureWorkloadByMachine.getOrDefault(id, MachineWorkload.NORMAL));
+            vw.put(id, vibrationWorkloadByMachine.getOrDefault(id, MachineWorkload.NORMAL));
+        }
+        r.setMachineTemperatureWorkloads(tw);
+        r.setMachineVibrationWorkloads(vw);
 
         r.setMachines(WorkingMemoryOps.getFacts(session, Machine.class));
         r.setTelemetry(List.of());
@@ -45,7 +49,6 @@ public final class SimulationSnapshotBuilder {
             r.setSensorSnapshotsThisTick(copySensorTrace(sensorTraceThisTick));
             sensorTraceThisTick.clear();
         }
-        r.setConditions(WorkingMemoryOps.getFacts(session, Condition.class));
         Map<String, String> nameByMachineId = machineIdToDisplayName(session);
         r.setAnomalies(sortAnomalies(new ArrayList<>(WorkingMemoryOps.getFacts(session, Anomaly.class)), nameByMachineId));
         r.setInterventions(sortInterventions(new ArrayList<>(WorkingMemoryOps.getFacts(session, Intervention.class)), nameByMachineId));

@@ -1,14 +1,8 @@
 package rules;
 
 import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.Condition;
-import com.luka.kbpdm.domain.ConditionType;
-import com.luka.kbpdm.domain.Anomaly;
-import com.luka.kbpdm.domain.AnomalyType;
 import com.luka.kbpdm.domain.Intervention;
 import com.luka.kbpdm.domain.PriorityLevel;
-import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.ComponentStatus;
 import com.luka.kbpdm.domain.HealthStatus;
 import com.luka.kbpdm.domain.SafetyCheck;
@@ -30,49 +24,16 @@ declare TickStatus
   @timestamp( ts )
 end
 
-rule "L2: Potential bearing failure anomaly"
-salience 20
-when
-  SimulatedClock( $t : now )
-  $m : Machine( $id : machineId )
-  Condition( machineId == $id, type == ConditionType.HIGH_TEMPERATURE )
-  Condition( machineId == $id, type == ConditionType.HIGH_VIBRATION )
-  not Anomaly( machineId == $id, type == AnomalyType.POTENTIAL_BEARING_FAILURE )
-then
-  insert(new Anomaly(
-      $id,
-      AnomalyType.POTENTIAL_BEARING_FAILURE,
-      "High temperature and high vibration detected.",
-      $t
-  ));
-end
-
-//rule "L3: Medium intervention for CEP temperature trend"
-//salience 8
-//when
-//  SimulatedClock( $t : now )
-//  $m : Machine( $id : machineId )
-//  Anomaly( machineId == $id, type == AnomalyType.TEMPERATURE_RISING_TREND )
-//  not Intervention( machineId == $id, priority == PriorityLevel.MEDIUM )
-//then
-//  insert(new Intervention(
-//      $id,
-//      PriorityLevel.MEDIUM,
-//      "Investigate cooling and thermal load; temperature is rising in a sustained pattern.",
-//      $t
-//  ));
-//end
-
-rule "Halt: 5 consecutive bearing-failure anomalies"
+rule "Halt: 5 consecutive ticks in thermal or vibration stress band (OR)"
 salience 12
 when
   SimulatedClock( $t : now )
   $m : Machine( $id : machineId )
-  $t1 : TickStatus( machineId == $id, bearingFailurePresent == true ) over window:time(100h)
-  $t2 : TickStatus( machineId == $id, bearingFailurePresent == true, this after[1m, 1000m] $t1 )
-  $t3 : TickStatus( machineId == $id, bearingFailurePresent == true, this after[1m, 1000m] $t2 )
-  $t4 : TickStatus( machineId == $id, bearingFailurePresent == true, this after[1m, 1000m] $t3 )
-  $t5 : TickStatus( machineId == $id, bearingFailurePresent == true, this after[1m, 4800m] $t1, this after[1m, 1000m] $t4 )
+  $t1 : TickStatus( machineId == $id, sustainedStressPresent == true ) over window:time(100h)
+  $t2 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 1000m] $t1 )
+  $t3 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 1000m] $t2 )
+  $t4 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 1000m] $t3 )
+  $t5 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 4800m] $t1, this after[1m, 1000m] $t4 )
   not MachineHalted( machineId == $id )
   not Intervention( machineId == $id, priority == PriorityLevel.CRITICAL )
   $cs : ComponentStatus( machineId == $id, health != HealthStatus.FAIL )
@@ -82,7 +43,7 @@ then
   insert(new Intervention(
       $id,
       PriorityLevel.CRITICAL,
-      "Stop the machine and inspect bearing immediately.",
+      "Halt: temperature or vibration in sustained stress band for 5 consecutive sub-steps (OR). Inspect machine.",
       $t
   ));
 end
@@ -96,7 +57,7 @@ then
   insert(new UnsafeReason(
       $id,
       "OPERATOR_HALT",
-      "POTENTIAL_BEARING_FAILURE persisted 5 consecutive ticks; operator fix required."
+      "Sustained stress band (temperature OR vibration) for 5 consecutive ticks; operator fix required."
   ));
 end
 
