@@ -1,7 +1,5 @@
 export type MachineWorkload = 'NORMAL' | 'OVERWORKED' | 'REST';
 
-export type TelemetryMetricKey = 'TEMPERATURE_C' | 'VIBRATION_RMS';
-
 export interface RuleFiring {
   ruleName: string;
   machineId: string | null;
@@ -19,6 +17,7 @@ export interface SensorStatus {
 export interface Anomaly {
   machineId: string;
   type: string;
+  metricKey?: string | null;
   description: string;
   detectedAt: string;
 }
@@ -37,14 +36,31 @@ export interface SafetyResult {
   evaluatedAt: string;
 }
 
+export interface MetricProfileView {
+  metricKey: string;
+  displayName: string;
+  unit: string;
+  decimals: number;
+  workloadEnabled: boolean;
+  trendEnabled: boolean;
+  anomalyEnabled: boolean;
+  stressEnabled: boolean;
+}
+
+export interface MachineProfileView {
+  machineId: string;
+  displayName: string;
+  machineType: string;
+  metrics: MetricProfileView[];
+}
+
 export interface SimulationReport {
   simulatedTime: string;
   tickMinutes: number;
   safetyHaltedMachineIds?: string[];
-  machineTemperatureWorkloads?: Record<string, MachineWorkload>;
-  machineVibrationWorkloads?: Record<string, MachineWorkload>;
+  machineProfiles?: MachineProfileView[];
+  machineMetricWorkloads?: Record<string, Record<string, MachineWorkload>>;
   rulesFiredThisTick: RuleFiring[];
-
   sensors: SensorStatus[];
   sensorSnapshotsThisTick?: SensorStatus[][];
   anomalies: Anomaly[];

@@ -28,8 +28,8 @@
         <sensors-panel
           [sensors]="sensors()"
           [haltedMachineIds]="safetyHaltedMachineIds()"
-          [temperatureWorkloads]="machineTemperatureWorkloads()"
-          [vibrationWorkloads]="machineVibrationWorkloads()"
+          [machineProfiles]="machineProfiles()"
+          [machineMetricWorkloads]="machineMetricWorkloads()"
           [controlsBusy]="controlsBusy()"
           (workloadCycle)="cycleWorkload($event)"
         />

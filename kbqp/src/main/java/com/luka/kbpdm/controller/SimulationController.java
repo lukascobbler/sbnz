@@ -2,7 +2,6 @@ package com.luka.kbpdm.controller;
 
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SimulationReport;
-import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.service.SimulationEngine;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +55,7 @@ public class SimulationController {
         if (req == null || req.getMachineId() == null || req.getMachineId().isBlank() || req.getWorkload() == null) {
             return engine.snapshot();
         }
-        engine.setMachineWorkload(req.getMachineId().trim(), req.getWorkload(), req.getMetric());
+        engine.setMachineWorkload(req.getMachineId().trim(), req.getWorkload(), req.getMetricKey());
         return engine.snapshot();
     }
 
@@ -79,6 +78,6 @@ public class SimulationController {
     public static class WorkloadRequest {
         private String machineId;
         private MachineWorkload workload;
-        private TelemetryMetric metric;
+        private String metricKey;
     }
 }

@@ -66,6 +66,9 @@ public final class WorkingMemoryOps {
         if (o instanceof TickStatus t) {
             return t.getMachineId();
         }
+        if (o instanceof MetricTick t) {
+            return t.getMachineId();
+        }
         if (o instanceof UnsafeReason u) {
             return u.getMachineId();
         }
@@ -91,6 +94,12 @@ public final class WorkingMemoryOps {
         }
         for (Object o : session.getObjects(new ClassObjectFilter(TickStatus.class))) {
             TickStatus t = (TickStatus) o;
+            if (t.getTs() < cutoffEpochMillis) {
+                toDelete.add(o);
+            }
+        }
+        for (Object o : session.getObjects(new ClassObjectFilter(MetricTick.class))) {
+            MetricTick t = (MetricTick) o;
             if (t.getTs() < cutoffEpochMillis) {
                 toDelete.add(o);
             }

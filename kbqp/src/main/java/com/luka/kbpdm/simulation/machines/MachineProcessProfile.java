@@ -4,9 +4,10 @@ import com.luka.kbpdm.domain.ComponentType;
 import com.luka.kbpdm.domain.MachineType;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-import static com.luka.kbpdm.simulation.SimulationConstants.TELEMETRY_NORMAL_DRIFT_HIGH_MULT;
 
 public record MachineProcessProfile(
         String machineId,
@@ -15,16 +16,8 @@ public record MachineProcessProfile(
         ComponentType componentType,
         Duration serviceInterval,
         Duration componentAgeAtStart,
-        double tempNominalC,
-        double vibNominalRms,
-        double tempCreepScale,
-        double vibCreepScale,
-        double tempAnomalyThresholdC,
-        double vibAnomalyThresholdRms,
-        double tempStressThresholdC,
-        double vibStressThresholdRms
+        List<MetricProfile> metrics
 ) {
-
     public MachineProcessProfile {
         Objects.requireNonNull(machineId, "machineId");
         Objects.requireNonNull(displayName, "displayName");
@@ -32,40 +25,41 @@ public record MachineProcessProfile(
         Objects.requireNonNull(componentType, "componentType");
         Objects.requireNonNull(serviceInterval, "serviceInterval");
         Objects.requireNonNull(componentAgeAtStart, "componentAgeAtStart");
-        if (tempAnomalyThresholdC <= tempStressThresholdC) {
-            throw new IllegalArgumentException(
-                    machineId + ": temp anomaly must be > temp stress (" + tempAnomalyThresholdC + " <= " + tempStressThresholdC + ")");
+        Objects.requireNonNull(metrics, "metrics");
+        if (metrics.isEmpty()) {
+            throw new IllegalArgumentException(machineId + ": machine must define at least one metric");
         }
-        if (vibAnomalyThresholdRms <= vibStressThresholdRms) {
-            throw new IllegalArgumentException(
-                    machineId + ": vib anomaly must be > vib stress");
+        Map<String, Boolean> seen = new LinkedHashMap<>();
+        for (MetricProfile m : metrics) {
+            if (seen.put(m.metricKey(), Boolean.TRUE) != null) {
+                throw new IllegalArgumentException(machineId + ": duplicate metricKey " + m.metricKey());
+            }
         }
-        double tempNormalHi = tempNominalC * TELEMETRY_NORMAL_DRIFT_HIGH_MULT;
-        double vibNormalHi = vibNominalRms * TELEMETRY_NORMAL_DRIFT_HIGH_MULT;
-        if (tempStressThresholdC <= tempNormalHi) {
-            throw new IllegalArgumentException(
-                    machineId + ": temp stress must exceed NORMAL workload upper envelope (~"
-                            + tempNormalHi + "°C), got " + tempStressThresholdC);
-        }
-        if (vibStressThresholdRms <= vibNormalHi) {
-            throw new IllegalArgumentException(
-                    machineId + ": vib stress must exceed NORMAL workload upper envelope (~"
-                            + vibNormalHi + " RMS), got " + vibStressThresholdRms);
-        }
+        metrics = List.copyOf(metrics);
     }
 
-    public boolean sustainedStressBandActive(double tempC, double vibRms) {
-        if (Double.isNaN(tempC) || Double.isNaN(vibRms)) {
+    public MetricProfile metricOrNull(String metricKey) {
+        for (MetricProfile m : metrics) {
+            if (m.metricKey().equals(metricKey)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    public boolean sustainedStressBandActive(Map<String, Double> valuesByMetric) {
+        if (valuesByMetric == null || valuesByMetric.isEmpty()) {
             return false;
         }
-        return tempC >= tempStressThresholdC || vibRms >= vibStressThresholdRms;
-    }
-
-    public double telemetryTempThresholdHint() {
-        return tempAnomalyThresholdC;
-    }
-
-    public double telemetryVibThresholdHint() {
-        return vibAnomalyThresholdRms;
+        for (MetricProfile m : metrics) {
+            if (!m.hasStressThreshold()) {
+                continue;
+            }
+            Double v = valuesByMetric.get(m.metricKey());
+            if (v != null && !Double.isNaN(v) && v >= m.stressThreshold()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

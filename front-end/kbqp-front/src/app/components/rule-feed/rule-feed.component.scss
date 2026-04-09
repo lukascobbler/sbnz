@@ -148,43 +148,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.rule-machine-group.machine-lin {
-  border-left: 4px solid #2d6cdf;
-  padding-left: 6px;
-}
-
-.rule-machine-group.machine-cnc {
-  border-left: 4px solid #c084fc;
-  padding-left: 6px;
-}
-
-.rule-machine-group.machine-none {
-  border-left: 4px solid rgba(255, 255, 255, 0.22);
-  padding-left: 6px;
-}
-
-.machine-accent-row.machine-lin {
-  border-left: 3px solid #2d6cdf;
-  padding-left: 6px;
-}
-
-.machine-accent-row.machine-cnc {
-  border-left: 3px solid #c084fc;
-  padding-left: 6px;
-}
-
-.pill.pill-machine.pill-lin {
-  background: rgba(45, 108, 223, 0.2);
-  border-color: rgba(45, 108, 223, 0.42);
-  color: #dbe8ff;
-}
-
-.pill.pill-machine.pill-cnc {
-  background: rgba(192, 132, 252, 0.16);
-  border-color: rgba(192, 132, 252, 0.38);
-  color: #f0e4ff;
-}
-
 .th {
   font-size: 9px;
   text-transform: uppercase;

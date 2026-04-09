@@ -22,18 +22,20 @@
             @for (a of anomalies; track $index) {
               <div
                 class="tr event-log-row machine-accent-row"
-                [class.machine-lin]="a.machineId === 'LIN'"
-                [class.machine-cnc]="a.machineId === 'CNC'"
+                [ngClass]="machineAccentClass(a.machineId)"
               >
                 <div class="td mono muted date-cell">{{ a.detectedAt | prettyDate }}</div>
                 <div class="td">
-                  <span
-                    class="pill pill-machine"
-                    [class.pill-lin]="a.machineId === 'LIN'"
-                    [class.pill-cnc]="a.machineId === 'CNC'"
-                    >{{ a.machineId }}</span>
+                  <span class="pill pill-machine" [ngClass]="machineAccentClass(a.machineId)">{{
+                    a.machineId
+                  }}</span>
                 </div>
-                <div class="td"><span class="pill warn">{{ a.type }}</span></div>
+                <div class="td">
+                  <span class="pill warn">{{ a.type }}</span>
+                  @if (a.metricKey) {
+                    <span class="pill warn">{{ a.metricKey }}</span>
+                  }
+                </div>
                 <div class="td small wide">{{ a.description }}</div>
               </div>
             }
@@ -64,16 +66,13 @@
             @for (i of interventions; track $index) {
               <div
                 class="tr event-log-row machine-accent-row"
-                [class.machine-lin]="i.machineId === 'LIN'"
-                [class.machine-cnc]="i.machineId === 'CNC'"
+                [ngClass]="machineAccentClass(i.machineId)"
               >
                 <div class="td mono muted date-cell">{{ i.decidedAt | prettyDate }}</div>
                 <div class="td">
-                  <span
-                    class="pill pill-machine"
-                    [class.pill-lin]="i.machineId === 'LIN'"
-                    [class.pill-cnc]="i.machineId === 'CNC'"
-                    >{{ i.machineId }}</span>
+                  <span class="pill pill-machine" [ngClass]="machineAccentClass(i.machineId)">{{
+                    i.machineId
+                  }}</span>
                 </div>
                 <div class="td">
                   <span
@@ -96,7 +95,7 @@
     <aside class="panel-side">
       <info-dialog-btn
         title="Safety"
-        body="UNSAFE when a machine is halted: the halt rule fires after 5 consecutive sub-steps where simulated temperature OR vibration stays in a sustained stress band (lower thresholds than the high-band anomalies). The rule inserts CRITICAL intervention, sets component HealthStatus.FAIL, and stops telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
+        body="UNSAFE when a machine is halted: halt fires after 5 consecutive sub-steps where at least one profile-marked critical metric stays in its stress band. The rule inserts CRITICAL intervention, sets component HealthStatus.FAIL, and stops telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
       />
     </aside>
     <div class="panel-content">
@@ -120,16 +119,13 @@
           @for (s of safetyResults; track $index) {
             <div
               class="tr event-log-row safety-head-ext machine-accent-row"
-              [class.machine-lin]="s.machineId === 'LIN'"
-              [class.machine-cnc]="s.machineId === 'CNC'"
+              [ngClass]="machineAccentClass(s.machineId)"
             >
               <div class="td mono muted date-cell">{{ s.evaluatedAt | prettyDate }}</div>
               <div class="td">
-                <span
-                  class="pill pill-machine"
-                  [class.pill-lin]="s.machineId === 'LIN'"
-                  [class.pill-cnc]="s.machineId === 'CNC'"
-                  >{{ s.machineId }}</span>
+                <span class="pill pill-machine" [ngClass]="machineAccentClass(s.machineId)">{{
+                  s.machineId
+                }}</span>
               </div>
               <div class="td">
                 <span class="pill" [class.ok]="s.safe" [class.bad]="!s.safe">

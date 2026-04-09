@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 public class TickStatus {
     private String machineId;
     private boolean sustainedStressPresent;
-    private double temperatureC;
-    private double vibrationRms;
     private long tickIndex;
     private long ts;
 }

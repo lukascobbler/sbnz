@@ -1,0 +1,68 @@
+@use 'sass:list';
+@use 'sass:color';
+
+// (border, sparkline stroke, sparkline fill) — pill text derived via lightness
+// Keep length in sync with MACHINE_ACCENT_COUNT in app/utils/machine-accent.ts
+$machine-accent-tuples: (
+  (#2d6cdf, #5b94f5, #2d6cdf, #dbe8ff),
+  (#c084fc, #d8b4fe, #c084fc, #f0e4ff),
+  (#10b981, #34d399, #10b981, #d1fae5),
+  (#d97706, #fbbf24, #d97706, #fef3c7),
+  (#e11d48, #fb7185, #e11d48, #ffe4e6),
+  (#0891b2, #22d3ee, #0891b2, #cffafe),
+  (#ea580c, #fb923c, #ea580c, #ffedd5),
+  (#65a30d, #a3e635, #65a30d, #ecfccb)
+);
+
+@mixin machine-accent-surfaces() {
+  @for $i from 0 through list.length($machine-accent-tuples) - 1 {
+    $t: list.nth($machine-accent-tuples, $i + 1);
+    $border: list.nth($t, 1);
+    $pill-text: list.nth($t, 4);
+
+    .machine-accent-row.machine-accent-#{$i} {
+      border-left: 3px solid $border;
+      padding-left: 6px;
+    }
+
+    .rule-machine-group.machine-accent-#{$i} {
+      border-left: 4px solid $border;
+      padding-left: 6px;
+    }
+
+    .sensor-group.machine-accent-#{$i} {
+      border-left: 4px solid $border;
+      padding-left: 8px;
+    }
+
+    .pill.pill-machine.machine-accent-#{$i} {
+      background: color.change($border, $alpha: 0.2);
+      border-color: color.change($border, $alpha: 0.42);
+      color: $pill-text;
+    }
+  }
+}
+
+@mixin machine-accent-sparklines() {
+  @for $i from 0 through list.length($machine-accent-tuples) - 1 {
+    $t: list.nth($machine-accent-tuples, $i + 1);
+    $line: list.nth($t, 2);
+    $fill: list.nth($t, 3);
+
+    :host-context(.sensor-group.machine-accent-#{$i}) {
+      .sparkline-line {
+        stroke: $line;
+      }
+
+      .sparkline-fill-stop0 {
+        stop-color: $fill;
+        stop-opacity: 0.36;
+      }
+
+      .sparkline-fill-stop1 {
+        stop-color: $fill;
+        stop-opacity: 0.02;
+      }
+    }
+  }
+}

@@ -59,6 +59,9 @@ public final class RuleMatchModel {
             return "Reading(" + r.getMetric() + "=" + v + ")";
         }
         if (o instanceof Anomaly a) {
+            if (a.getMetricKey() != null) {
+                return "Anomaly(" + a.getType() + ":" + a.getMetricKey() + ")";
+            }
             return "Anomaly(" + a.getType() + ")";
         }
         if (o instanceof Intervention i) {
@@ -78,6 +81,10 @@ public final class RuleMatchModel {
         }
         if (o instanceof TickStatus t) {
             return t.isSustainedStressPresent() ? "Tick(stress)" : "Tick(ok)";
+        }
+        if (o instanceof MetricTick t) {
+            String v = String.format(Locale.ROOT, "%.2f", t.getValue());
+            return "MetricTick(" + t.getMetricKey() + "=" + v + ")";
         }
         if (o instanceof MachineHalted) {
             return "HALTED";
@@ -112,6 +119,9 @@ public final class RuleMatchModel {
         }
         if (o instanceof MachineHalted h) {
             return h.getMachineId();
+        }
+        if (o instanceof MetricTick t) {
+            return t.getMachineId();
         }
         return null;
     }

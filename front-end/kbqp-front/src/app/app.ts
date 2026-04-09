@@ -39,12 +39,8 @@ export class App {
   protected readonly simulatedTime = computed(() => this.report()?.simulatedTime ?? null);
   protected readonly rulesFiredThisTick = computed(() => this.report()?.rulesFiredThisTick ?? []);
   protected readonly safetyHaltedMachineIds = computed(() => this.report()?.safetyHaltedMachineIds ?? []);
-  protected readonly machineTemperatureWorkloads = computed(
-    () => this.report()?.machineTemperatureWorkloads ?? {},
-  );
-  protected readonly machineVibrationWorkloads = computed(
-    () => this.report()?.machineVibrationWorkloads ?? {},
-  );
+  protected readonly machineProfiles = computed(() => this.report()?.machineProfiles ?? []);
+  protected readonly machineMetricWorkloads = computed(() => this.report()?.machineMetricWorkloads ?? {});
 
   private readonly pendingHttp = signal(0);
   protected readonly controlsBusy = computed(() => this.pendingHttp() > 0);
@@ -100,15 +96,14 @@ export class App {
 
   protected cycleWorkload(payload: WorkloadCyclePayload) {
     if (this.controlsBusy()) return;
-    const { machineId, metric } = payload;
-    const map =
-      metric === 'TEMPERATURE_C' ? this.machineTemperatureWorkloads() : this.machineVibrationWorkloads();
-    const w = map[machineId] ?? 'NORMAL';
+    const { machineId, metricKey } = payload;
+    const machineMap = this.machineMetricWorkloads()[machineId] ?? {};
+    const w = machineMap[metricKey] ?? 'NORMAL';
     let idx = App.WORKLOAD_ORDER.indexOf(w);
     if (idx < 0) idx = 0;
     const next = App.WORKLOAD_ORDER[(idx + 1) % App.WORKLOAD_ORDER.length];
     this.error.set(null);
-    this.trackHttp(this.sim.setWorkload(machineId, next, metric)).subscribe({
+    this.trackHttp(this.sim.setWorkload(machineId, next, metricKey)).subscribe({
       next: (r) => this.sim.ingestReport(r),
       error: () => this.error.set('Workload update failed'),
     });

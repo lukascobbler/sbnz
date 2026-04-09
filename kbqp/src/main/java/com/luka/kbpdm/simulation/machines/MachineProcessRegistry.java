@@ -15,12 +15,6 @@ import static com.luka.kbpdm.domain.ComponentType.MOTOR;
 import static com.luka.kbpdm.domain.MachineType.CNC;
 import static com.luka.kbpdm.domain.MachineType.CONVEYOR;
 
-/**
- * Single registry of simulated machines. Drools threshold rules, telemetry, stress bands, WM seeding,
- * and API workload keys are all derived from {@link #profilesInOrder()}.
- * <p>To add a machine: define a {@link MachineProcessProfile} factory below, append it to the list in
- * the constructor, and ensure stress &lt; anomaly and stress above nominal×{@link com.luka.kbpdm.simulation.SimulationConstants#TELEMETRY_NORMAL_DRIFT_HIGH_MULT}.</p>
- */
 @Component
 public final class MachineProcessRegistry {
 
@@ -28,10 +22,7 @@ public final class MachineProcessRegistry {
     private final Map<String, MachineProcessProfile> byId;
 
     public MachineProcessRegistry() {
-        List<MachineProcessProfile> list = new ArrayList<>();
-        list.add(conveyorLine());
-        list.add(cncMill());
-        this.orderedProfiles = Collections.unmodifiableList(list);
+        this.orderedProfiles = List.of(conveyorLine(), cncMill());
         Map<String, MachineProcessProfile> map = new LinkedHashMap<>();
         for (MachineProcessProfile p : orderedProfiles) {
             map.put(p.machineId(), p);
@@ -42,38 +33,30 @@ public final class MachineProcessRegistry {
     private static MachineProcessProfile conveyorLine() {
         return new MachineProcessProfile(
                 "LIN",
-                "Line",
+                "Conveyor line",
                 CONVEYOR,
                 BEARING,
                 Duration.ofDays(30),
                 Duration.ofDays(25),
-                69.0,
-                3.35,
-                0.55,
-                0.09,
-                86.0,
-                4.4,
-                78.0,
-                3.85
+                List.of(
+                        new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 69.0, 0.55, 86.0, 78.0, true, true),
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 4.4, 3.85, true, true)
+                )
         );
     }
 
     private static MachineProcessProfile cncMill() {
         return new MachineProcessProfile(
                 "CNC",
-                "CNC",
+                "CNC Mill",
                 CNC,
                 MOTOR,
                 Duration.ofDays(90),
                 Duration.ofDays(10),
-                59.0,
-                4.65,
-                0.28,
-                0.07,
-                78.0,
-                5.9,
-                67.5,
-                5.35
+                List.of(
+                        new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 59.0, 0.28, 78.0, 67.5, true, true),
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.9, 5.35, true, true)
+                )
         );
     }
 

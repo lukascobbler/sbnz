@@ -1,3 +1,5 @@
+@use 'styles/machine-accents' as machine-accents;
+
 :host {
   display: block;
   width: 100%;
@@ -43,34 +45,4 @@
   stop-opacity: 0.02;
 }
 
-:host-context(.sensor-group.machine-lin) {
-  .sparkline-line {
-    stroke: #5b94f5;
-  }
-
-  .sparkline-fill-stop0 {
-    stop-color: #2d6cdf;
-    stop-opacity: 0.38;
-  }
-
-  .sparkline-fill-stop1 {
-    stop-color: #2d6cdf;
-    stop-opacity: 0.02;
-  }
-}
-
-:host-context(.sensor-group.machine-cnc) {
-  .sparkline-line {
-    stroke: #d8b4fe;
-  }
-
-  .sparkline-fill-stop0 {
-    stop-color: #c084fc;
-    stop-opacity: 0.32;
-  }
-
-  .sparkline-fill-stop1 {
-    stop-color: #c084fc;
-    stop-opacity: 0.02;
-  }
-}
+@include machine-accents.machine-accent-sparklines();

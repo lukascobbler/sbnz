@@ -1,15 +1,13 @@
 template header
 ruleName
 machineId
-metric
+metricKey
 high
-anomalyType
 description
 
 package rules;
 
 import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.TelemetryReading;
 import com.luka.kbpdm.domain.Anomaly;
 import com.luka.kbpdm.domain.AnomalyType;
@@ -24,12 +22,13 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "@{machineId}" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == TelemetryMetric.@{metric}, value >= @{high} )
-  not Anomaly( machineId == $m.machineId, type == AnomalyType.@{anomalyType} )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "@{metricKey}", value >= @{high} )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "@{metricKey}" )
 then
   insert(new Anomaly(
       $m.getMachineId(),
-      AnomalyType.@{anomalyType},
+      AnomalyType.ABOVE_THRESHOLD,
+      "@{metricKey}",
       "@{description}",
       $t
   ));

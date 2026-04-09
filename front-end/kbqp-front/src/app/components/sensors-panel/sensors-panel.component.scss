@@ -152,6 +152,10 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.sensor-group-head .pill.pill-machine {
+  font-weight: 650;
+}
+
 .workload-drivers {
   display: flex;
   flex-wrap: wrap;
@@ -168,22 +172,7 @@
 .workload-metric-label {
   font-weight: 750;
   opacity: 0.88;
-  min-width: 1.75em;
-}
-
-.sensor-group.machine-lin {
-  border-left: 4px solid #2d6cdf;
-  padding-left: 8px;
-}
-
-.sensor-group.machine-cnc {
-  border-left: 4px solid #c084fc;
-  padding-left: 8px;
-}
-
-.sensor-group:not(.machine-lin):not(.machine-cnc) {
-  border-left: 4px solid rgba(255, 255, 255, 0.25);
-  padding-left: 8px;
+  min-width: 3em;
 }
 
 .workload-btn {
@@ -265,6 +254,10 @@
   color: var(--kb-muted);
 }
 
+.small {
+  font-size: 10px;
+}
+
 .mono {
   font-family: var(--kb-mono);
 }
@@ -272,18 +265,6 @@
 .date-cell {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-  font-size: 10px;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(45, 108, 223, 0.14);
-  border: 1px solid rgba(45, 108, 223, 0.28);
-  color: var(--kb-accent);
-  font-weight: 650;
   font-size: 10px;
 }
 

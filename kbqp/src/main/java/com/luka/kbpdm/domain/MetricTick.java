@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TelemetryReading {
+public class MetricTick {
     private String machineId;
-    private String metric;
+    private String metricKey;
     private double value;
+    private long tickIndex;
     private long ts;
 }

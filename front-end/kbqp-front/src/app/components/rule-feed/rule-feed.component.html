@@ -25,22 +25,18 @@
             @for (mg of g.machineGroups; track mg.machineId) {
               <div
                 class="rule-machine-nested rule-machine-group"
-                [class.machine-lin]="mg.machineId === 'LIN'"
-                [class.machine-cnc]="mg.machineId === 'CNC'"
-                [class.machine-none]="mg.machineId !== 'LIN' && mg.machineId !== 'CNC'"
+                [ngClass]="machineAccentClass(mg.machineId)"
               >
                 <div class="rule-group-head rule-machine-nested-head">
                   <span
                     class="pill pill-machine tag-compact"
-                    [class.pill-lin]="mg.machineId === 'LIN'"
-                    [class.pill-cnc]="mg.machineId === 'CNC'"
+                    [ngClass]="machineAccentClass(mg.machineId)"
                     >{{ mg.machineId }}</span>
                 </div>
                 @for (row of mg.rows; track row.ruleName + (row.output ?? '')) {
                   <div
                     class="tr rules-row rules-feed-grid-tick machine-accent-row"
-                    [class.machine-lin]="row.machineId === 'LIN'"
-                    [class.machine-cnc]="row.machineId === 'CNC'"
+                    [ngClass]="machineAccentClass(row.machineId)"
                   >
                     <div class="td mono rule-cell">
                       <span class="rule-cell-inner">

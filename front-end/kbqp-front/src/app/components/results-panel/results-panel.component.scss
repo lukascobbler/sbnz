@@ -104,12 +104,12 @@
 
 .table.event-log.anomalies-table .event-log-head,
 .table.event-log.anomalies-table .event-log-row {
-  grid-template-columns: 132px 76px 168px minmax(0, 1fr);
+  grid-template-columns: 132px 76px 200px minmax(0, 1fr);
 }
 
 .table.event-log.interventions-table .event-log-head,
 .table.event-log.interventions-table .event-log-row {
-  grid-template-columns: 132px 76px 168px minmax(0, 1fr);
+  grid-template-columns: 132px 76px 100px minmax(0, 1fr);
 }
 
 .anomalies-table .date-cell,
@@ -219,18 +219,6 @@
   background: rgba(245, 158, 11, 0.12);
 }
 
-.pill.pill-machine.pill-lin {
-  background: rgba(45, 108, 223, 0.2);
-  border-color: rgba(45, 108, 223, 0.42);
-  color: #dbe8ff;
-}
-
-.pill.pill-machine.pill-cnc {
-  background: rgba(192, 132, 252, 0.16);
-  border-color: rgba(192, 132, 252, 0.38);
-  color: #f0e4ff;
-}
-
 .pill.pill-pri-medium {
   background: rgba(250, 204, 21, 0.12);
   border-color: rgba(250, 204, 21, 0.32);
@@ -247,16 +235,6 @@
   background: rgba(248, 113, 113, 0.12);
   border-color: rgba(248, 113, 113, 0.38);
   color: #fecaca;
-}
-
-.machine-accent-row.machine-lin {
-  border-left: 3px solid #2d6cdf;
-  padding-left: 6px;
-}
-
-.machine-accent-row.machine-cnc {
-  border-left: 3px solid #c084fc;
-  padding-left: 6px;
 }
 
 .btn {

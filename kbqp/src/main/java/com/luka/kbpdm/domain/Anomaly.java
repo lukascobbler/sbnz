@@ -13,9 +13,9 @@ import java.time.Instant;
 public class Anomaly {
     private String machineId;
     private AnomalyType type;
+    private String metricKey;
     private String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant detectedAt;
 }
-

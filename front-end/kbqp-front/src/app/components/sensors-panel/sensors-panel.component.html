@@ -2,7 +2,7 @@
   <aside class="panel-side">
     <info-dialog-btn
       title="Sensors & trends"
-      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). One chart point per simulated 30 min sub-step. Two drivers per machine: temperature (°C) and vibration (RMS) each cycle Normal → Overworked → Rest independently (arrow hints: → normal drift, ↑ worsens that signal only, ↓ eases toward nominal). Halt uses a lower stress band: 5 consecutive sub-steps where temperature OR vibration exceeds that band. Halted machines keep last readings until Fix. Reset clears charts."
+      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). Controls are profile-driven: each machine can expose any number of workload-enabled metrics, and each metric cycles Normal → Overworked → Rest independently. Halt rules use profile-defined stress bands for critical metrics and trigger after 5 consecutive stressed sub-steps."
     />
   </aside>
   <div class="panel-content">
@@ -18,53 +18,50 @@
 
       <div class="table-body sensors-grouped-body sensors-with-charts scroll-pad">
         @for (g of groups(); track g.machineId) {
-          <div class="sensor-group" [class]="machineGroupClass(g.slug)">
+          <div class="sensor-group" [class]="machineGroupClass(g.machineId, g.slug)">
             <div class="sensor-group-head">
-              <span class="tag">{{ g.machineId }}</span>
+              <span class="pill pill-machine" [ngClass]="machineAccentClass(g.machineId)">{{
+                g.machineId
+              }}</span>
+              <span class="muted small">{{ g.displayName }}</span>
               <div class="workload-drivers">
-                <button
-                  type="button"
-                  class="btn secondary workload-btn workload-btn-metric"
-                  [class.workload-state-normal]="temperatureWorkloadOf(g.machineId) === 'NORMAL'"
-                  [class.workload-state-overworked]="temperatureWorkloadOf(g.machineId) === 'OVERWORKED'"
-                  [class.workload-state-rest]="temperatureWorkloadOf(g.machineId) === 'REST'"
-                  [title]="temperatureTitle()"
-                  [disabled]="controlsBusy"
-                  (click)="workloadCycle.emit({ machineId: g.machineId, metric: 'TEMPERATURE_C' })"
-                >
-                  <span class="workload-metric-label">°C</span>
-                  {{ workloadLabel(temperatureWorkloadOf(g.machineId)) }}
-                </button>
-                <button
-                  type="button"
-                  class="btn secondary workload-btn workload-btn-metric"
-                  [class.workload-state-normal]="vibrationWorkloadOf(g.machineId) === 'NORMAL'"
-                  [class.workload-state-overworked]="vibrationWorkloadOf(g.machineId) === 'OVERWORKED'"
-                  [class.workload-state-rest]="vibrationWorkloadOf(g.machineId) === 'REST'"
-                  [title]="vibrationTitle()"
-                  [disabled]="controlsBusy"
-                  (click)="workloadCycle.emit({ machineId: g.machineId, metric: 'VIBRATION_RMS' })"
-                >
-                  <span class="workload-metric-label">RMS</span>
-                  {{ workloadLabel(vibrationWorkloadOf(g.machineId)) }}
-                </button>
+                @for (m of g.workloadMetrics; track m.metricKey) {
+                  <button
+                    type="button"
+                    class="btn secondary workload-btn workload-btn-metric"
+                    [class.workload-state-normal]="workloadOf(g.machineId, m.metricKey) === 'NORMAL'"
+                    [class.workload-state-overworked]="workloadOf(g.machineId, m.metricKey) === 'OVERWORKED'"
+                    [class.workload-state-rest]="workloadOf(g.machineId, m.metricKey) === 'REST'"
+                    [title]="workloadTitle(m)"
+                    [disabled]="controlsBusy"
+                    (click)="workloadCycle.emit({ machineId: g.machineId, metricKey: m.metricKey })"
+                  >
+                    <span class="workload-metric-label">{{ m.displayName }}</span>
+                    {{ workloadLabel(workloadOf(g.machineId, m.metricKey)) }}
+                  </button>
+                }
               </div>
               @if (isHalted(g.machineId)) {
                 <span class="pill warn tag-halted">halted</span>
               }
             </div>
             <div class="sensor-metrics-grid">
-              @for (s of g.rows; track s.metric) {
+              @for (row of g.rows; track row.status.metric) {
                 <div class="sensor-metric-card" [class.sensor-row-stale]="isHalted(g.machineId)">
                   <div class="tr sensor-metric-row">
-                    <div class="td mono">{{ s.metric }}</div>
-                    <div class="td mono right">{{ s.value.toFixed(2) }}</div>
-                    <div class="td mono muted date-cell right">{{ s.ts | prettyDate }}</div>
+                    <div class="td mono">{{ metricDisplayName(row) }}</div>
+                    <div class="td mono right">
+                      {{ row.status.value.toFixed(metricDecimals(row)) }}
+                      @if (metricUnit(row) && metricUnit(row) !== 'none') {
+                        <span class="muted"> {{ metricUnit(row) }}</span>
+                      }
+                    </div>
+                    <div class="td mono muted date-cell right">{{ row.status.ts | prettyDate }}</div>
                   </div>
                   <div class="sensor-sparkline-wrap">
                     <sensor-sparkline
-                      [points]="history().get(g.machineId + '|' + s.metric) ?? emptyPoints"
-                      [metricLabel]="s.metric"
+                      [points]="history().get(g.machineId + '|' + row.status.metric) ?? emptyPoints"
+                      [metricLabel]="row.status.metric"
                     />
                   </div>
                 </div>

@@ -1,1 +1,4 @@
 @use 'styles/global-tokens';
+@use 'styles/machine-accents' as machine-accents;
+
+@include machine-accents.machine-accent-surfaces();

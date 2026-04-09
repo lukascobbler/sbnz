@@ -2,27 +2,19 @@ package com.luka.kbpdm.simulation.telemetry;
 
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SensorStatus;
-import com.luka.kbpdm.domain.TelemetryMetric;
 import com.luka.kbpdm.domain.TelemetryReading;
 import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.kie.api.runtime.KieSession;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SimulatedTelemetry {
 
     private final Map<String, Double> generatorState = new ConcurrentHashMap<>();
-
-    public Map<String, Double> generatorState() {
-        return generatorState;
-    }
 
     public void clearGeneratorState() {
         generatorState.clear();
@@ -36,62 +28,31 @@ public final class SimulatedTelemetry {
             KieSession session,
             Map<String, SensorStatus> sensors,
             Set<String> haltedMachineIds,
-            Map<String, MachineWorkload> temperatureWorkloadByMachine,
-            Map<String, MachineWorkload> vibrationWorkloadByMachine,
+            Map<String, Map<String, MachineWorkload>> workloadByMachineMetric,
             Instant simulatedTime,
             MachineProcessProfile profile
     ) {
-        String id = profile.machineId();
-        if (haltedMachineIds.contains(id)) {
+        String machineId = profile.machineId();
+        if (haltedMachineIds.contains(machineId)) {
             return;
         }
-        generateFor(
-                session,
-                sensors,
-                temperatureWorkloadByMachine,
-                simulatedTime,
-                id,
-                TelemetryMetric.TEMPERATURE_C,
-                profile.tempNominalC(),
-                profile.tempCreepScale(),
-                profile.telemetryTempThresholdHint()
-        );
-        generateFor(
-                session,
-                sensors,
-                vibrationWorkloadByMachine,
-                simulatedTime,
-                id,
-                TelemetryMetric.VIBRATION_RMS,
-                profile.vibNominalRms(),
-                profile.vibCreepScale(),
-                profile.telemetryVibThresholdHint()
-        );
+        Map<String, MachineWorkload> machineWorkloads = workloadByMachineMetric.getOrDefault(machineId, Map.of());
+        for (MetricProfile metric : profile.metrics()) {
+            generateMetric(session, sensors, simulatedTime, machineId, metric, machineWorkloads);
+        }
     }
 
-    public void resetToNominal(Map<String, SensorStatus> sensors, Instant simulatedTime, MachineProcessProfile profile) {
-        putPair(
-                sensors,
-                simulatedTime,
-                profile.machineId(),
-                profile.tempNominalC(),
-                profile.vibNominalRms()
-        );
-    }
-
-    private void putPair(
+    public void resetToNominal(
             Map<String, SensorStatus> sensors,
             Instant simulatedTime,
-            String machineId,
-            double temp,
-            double vib
+            MachineProcessProfile profile
     ) {
-        String tk = machineId + ":" + TelemetryMetric.TEMPERATURE_C.name();
-        String vk = machineId + ":" + TelemetryMetric.VIBRATION_RMS.name();
-        generatorState.put(tk, temp);
-        generatorState.put(vk, vib);
-        sensors.put(tk, new SensorStatus(machineId, TelemetryMetric.TEMPERATURE_C, temp, simulatedTime));
-        sensors.put(vk, new SensorStatus(machineId, TelemetryMetric.VIBRATION_RMS, vib, simulatedTime));
+        String machineId = profile.machineId();
+        for (MetricProfile metric : profile.metrics()) {
+            String key = metricStateKey(machineId, metric.metricKey());
+            generatorState.put(key, metric.nominal());
+            sensors.put(key, new SensorStatus(machineId, metric.metricKey(), metric.nominal(), simulatedTime));
+        }
     }
 
     public static List<SensorStatus> copySensorsSnapshot(Map<String, SensorStatus> sensors) {
@@ -101,26 +62,36 @@ public final class SimulatedTelemetry {
         }
         row.sort(Comparator
                 .comparing(SensorStatus::getMachineId, Comparator.nullsFirst(String::compareTo))
-                .thenComparing(s -> s.getMetric().name()));
+                .thenComparing(SensorStatus::getMetric));
         return row;
     }
 
-    private void generateFor(
+    private void generateMetric(
             KieSession session,
             Map<String, SensorStatus> sensors,
-            Map<String, MachineWorkload> workloadByMetric,
             Instant simulatedTime,
             String machineId,
-            TelemetryMetric metric,
-            double nominal,
-            double creepScale,
-            double thresholdHint
+            MetricProfile metric,
+            Map<String, MachineWorkload> machineWorkloads
     ) {
-        MachineWorkload w = workloadByMetric.getOrDefault(machineId, MachineWorkload.NORMAL);
-        String key = machineId + ":" + metric.name();
-        double prev = generatorState.getOrDefault(key, nominal);
+        MachineWorkload workload = machineWorkloads.getOrDefault(metric.metricKey(), MachineWorkload.NORMAL);
+        String key = metricStateKey(machineId, metric.metricKey());
+        double prev = generatorState.getOrDefault(key, metric.nominal());
+        double next = nextValue(prev, metric, workload);
+        generatorState.put(key, next);
+        session.insert(new TelemetryReading(machineId, metric.metricKey(), next, simulatedTime.toEpochMilli()));
+        sensors.put(key, new SensorStatus(machineId, metric.metricKey(), next, simulatedTime));
+    }
 
-        double next = switch (w) {
+    private static String metricStateKey(String machineId, String metricKey) {
+        return machineId + ":" + metricKey;
+    }
+
+    private static double nextValue(double prev, MetricProfile metric, MachineWorkload workload) {
+        double nominal = metric.nominal();
+        double creepScale = metric.creepScale();
+        double thresholdHint = metric.thresholdHintForGenerator();
+        return switch (workload) {
             case OVERWORKED -> {
                 double creep = creepScale * 0.26 * (1.0 + ThreadLocalRandom.current().nextDouble() * 0.25);
                 double n = prev + creep;
@@ -144,10 +115,5 @@ public final class SimulatedTelemetry {
                 yield Math.min(hi, Math.max(lo, n));
             }
         };
-
-        generatorState.put(key, next);
-        TelemetryReading r = new TelemetryReading(machineId, metric, next, simulatedTime.toEpochMilli());
-        session.insert(r);
-        sensors.put(key, new SensorStatus(machineId, metric, next, simulatedTime));
     }
 }

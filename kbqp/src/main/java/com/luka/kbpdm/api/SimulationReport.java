@@ -22,8 +22,8 @@ public class SimulationReport {
 
     private List<String> safetyHaltedMachineIds = new ArrayList<>();
 
-    private Map<String, MachineWorkload> machineTemperatureWorkloads = new LinkedHashMap<>();
-    private Map<String, MachineWorkload> machineVibrationWorkloads = new LinkedHashMap<>();
+    private List<MachineProfileView> machineProfiles = new ArrayList<>();
+    private Map<String, Map<String, MachineWorkload>> machineMetricWorkloads = new LinkedHashMap<>();
 
     private List<RuleFiring> rulesFiredThisTick = new ArrayList<>();
 

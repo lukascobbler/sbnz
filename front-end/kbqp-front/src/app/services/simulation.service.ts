@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, tap, throwError } from 'rxjs';
-import { SimulationReport, TelemetryMetricKey } from '../models/simulation.types';
+import { SimulationReport } from '../models/simulation.types';
 import { SensorHistoryService } from './sensor-history.service';
 
 function stripMachineDiagnoses(r: SimulationReport, machineId: string): SimulationReport {
@@ -156,8 +156,8 @@ export class SimulationService {
     return this.http.post<SimulationReport>('/api/v1/sim/step', { stepMinutes });
   }
 
-  setWorkload(machineId: string, workload: string, metric: TelemetryMetricKey) {
-    return this.http.post<SimulationReport>('/api/v1/sim/workload', { machineId, workload, metric });
+  setWorkload(machineId: string, workload: string, metricKey: string) {
+    return this.http.post<SimulationReport>('/api/v1/sim/workload', { machineId, workload, metricKey });
   }
 
   safetyFix(machineId: string) {

@@ -11,6 +11,7 @@ import com.luka.kbpdm.domain.UnsafeReason;
 import com.luka.kbpdm.domain.SimulatedClock;
 import com.luka.kbpdm.domain.MachineHalted;
 import com.luka.kbpdm.domain.TickStatus;
+import com.luka.kbpdm.domain.MetricTick;
 
 dialect "java"
 
@@ -24,7 +25,12 @@ declare TickStatus
   @timestamp( ts )
 end
 
-rule "Halt: 5 consecutive ticks in thermal or vibration stress band (OR)"
+declare MetricTick
+  @role( event )
+  @timestamp( ts )
+end
+
+rule "Halt: 5 consecutive ticks in critical metric stress band (OR)"
 salience 12
 when
   SimulatedClock( $t : now )
@@ -43,7 +49,7 @@ then
   insert(new Intervention(
       $id,
       PriorityLevel.CRITICAL,
-      "Halt: temperature or vibration in sustained stress band for 5 consecutive sub-steps (OR). Inspect machine.",
+      "Halt: one or more critical metrics remained in stress band for 5 consecutive sub-steps (OR). Inspect machine.",
       $t
   ));
 end
@@ -57,7 +63,7 @@ then
   insert(new UnsafeReason(
       $id,
       "OPERATOR_HALT",
-      "Sustained stress band (temperature OR vibration) for 5 consecutive ticks; operator fix required."
+      "Sustained stress band (at least one critical metric) for 5 consecutive ticks; operator fix required."
   ));
 end
 

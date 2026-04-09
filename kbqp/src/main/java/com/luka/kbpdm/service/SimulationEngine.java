@@ -5,12 +5,13 @@ import com.luka.kbpdm.api.RuleFiring;
 import com.luka.kbpdm.api.SensorStatus;
 import com.luka.kbpdm.api.SimulationReport;
 import com.luka.kbpdm.domain.*;
-import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
-import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
+import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import com.luka.kbpdm.simulation.report.SimulationSnapshotBuilder;
 import com.luka.kbpdm.simulation.rules.RuleMatchModel;
 import com.luka.kbpdm.simulation.telemetry.SimulatedTelemetry;
+import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
+import com.luka.kbpdm.simulation.machines.MetricProfile;
 import lombok.Getter;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
 import org.kie.api.runtime.KieContainer;
@@ -51,10 +52,8 @@ public class SimulationEngine implements DisposableBean {
     private final List<RuleFiring> rulesCollectedThisTick = new ArrayList<>();
     private volatile List<RuleFiring> rulesFromLastCompletedTick = List.of();
 
-    private final Map<String, MachineWorkload> temperatureWorkloadByMachine = new HashMap<>();
-    private final Map<String, MachineWorkload> vibrationWorkloadByMachine = new HashMap<>();
+    private final Map<String, Map<String, MachineWorkload>> workloadByMachineMetric = new LinkedHashMap<>();
     private final Map<String, Long> tickIndexByMachine = new HashMap<>();
-
     private final List<List<SensorStatus>> sensorTraceThisTick = new ArrayList<>();
 
     public SimulationEngine(
@@ -79,12 +78,14 @@ public class SimulationEngine implements DisposableBean {
         this.session = kieContainer.newKieSession();
         this.clock = session.getSessionClock();
         this.simulatedTime = SIMULATION_EPOCH;
-        this.temperatureWorkloadByMachine.clear();
-        this.vibrationWorkloadByMachine.clear();
+        this.workloadByMachineMetric.clear();
         this.tickIndexByMachine.clear();
-        for (String id : machineRegistry.machineIdsInOrder()) {
-            this.temperatureWorkloadByMachine.put(id, MachineWorkload.NORMAL);
-            this.vibrationWorkloadByMachine.put(id, MachineWorkload.NORMAL);
+        for (MachineProcessProfile profile : machineRegistry.profilesInOrder()) {
+            Map<String, MachineWorkload> perMetric = new LinkedHashMap<>();
+            for (MetricProfile metric : profile.metrics()) {
+                perMetric.put(metric.metricKey(), MachineWorkload.NORMAL);
+            }
+            workloadByMachineMetric.put(profile.machineId(), perMetric);
         }
 
         this.sensors.clear();
@@ -116,21 +117,20 @@ public class SimulationEngine implements DisposableBean {
         broadcastSnapshot();
     }
 
-    public synchronized void setMachineWorkload(String machineId, MachineWorkload workload, TelemetryMetric metric) {
-        if (session == null || workload == null) {
+    public synchronized void setMachineWorkload(String machineId, MachineWorkload workload, String metricKey) {
+        if (session == null || workload == null || metricKey == null || metricKey.isBlank()) {
             return;
         }
         if (!machineRegistry.hasMachine(machineId)) {
             return;
         }
-        if (metric == null) {
-            temperatureWorkloadByMachine.put(machineId, workload);
-            vibrationWorkloadByMachine.put(machineId, workload);
-        } else if (metric == TelemetryMetric.TEMPERATURE_C) {
-            temperatureWorkloadByMachine.put(machineId, workload);
-        } else if (metric == TelemetryMetric.VIBRATION_RMS) {
-            vibrationWorkloadByMachine.put(machineId, workload);
+        MachineProcessProfile profile = machineRegistry.require(machineId);
+        MetricProfile metric = profile.metricOrNull(metricKey);
+        if (metric == null || !metric.workloadEnabled()) {
+            return;
         }
+        Map<String, MachineWorkload> perMetric = workloadByMachineMetric.computeIfAbsent(machineId, k -> new LinkedHashMap<>());
+        perMetric.put(metricKey, workload);
         broadcastSnapshot();
     }
 
@@ -150,14 +150,10 @@ public class SimulationEngine implements DisposableBean {
     }
 
     public synchronized void operatorSafetyFix(String machineId) {
-        if (session == null) {
+        if (session == null || !machineRegistry.hasMachine(machineId)) {
             return;
         }
-        Optional<MachineProcessProfile> profileOpt = machineRegistry.profile(machineId);
-        if (profileOpt.isEmpty()) {
-            return;
-        }
-        MachineProcessProfile profile = profileOpt.get();
+        MachineProcessProfile profile = machineRegistry.require(machineId);
         boolean known = false;
         for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
             if (machineId.equals(m.getMachineId())) {
@@ -175,14 +171,17 @@ public class SimulationEngine implements DisposableBean {
         WorkingMemoryOps.deleteFactsForMachine(session, SafetyCheck.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, MachineHalted.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, TickStatus.class, machineId);
+        WorkingMemoryOps.deleteFactsForMachine(session, MetricTick.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, TelemetryReading.class, machineId);
         telemetry.removeKeysStartingWith(machineId + ":");
         tickIndexByMachine.remove(machineId);
 
         restoreComponentStatusAfterOperatorFix(profile);
         telemetry.resetToNominal(sensors, simulatedTime, profile);
-        temperatureWorkloadByMachine.put(machineId, MachineWorkload.NORMAL);
-        vibrationWorkloadByMachine.put(machineId, MachineWorkload.NORMAL);
+        Map<String, MachineWorkload> perMetric = workloadByMachineMetric.computeIfAbsent(machineId, k -> new LinkedHashMap<>());
+        for (MetricProfile metric : profile.metrics()) {
+            perMetric.put(metric.metricKey(), MachineWorkload.NORMAL);
+        }
 
         refreshSimulatedClock();
         rulesCollectedThisTick.clear();
@@ -212,9 +211,8 @@ public class SimulationEngine implements DisposableBean {
                 simulatedTime,
                 session,
                 sensors,
-                temperatureWorkloadByMachine,
-                vibrationWorkloadByMachine,
-                machineRegistry.machineIdsInOrder(),
+                workloadByMachineMetric,
+                machineRegistry.profilesInOrder(),
                 sensorTraceThisTick,
                 rulesFromLastCompletedTick
         );
@@ -259,17 +257,9 @@ public class SimulationEngine implements DisposableBean {
             WorkingMemoryOps.pruneOldTelemetryAndTicks(session, cutoff);
 
             for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
-                String mid = m.getMachineId();
-                machineRegistry.profile(mid).ifPresent(p ->
-                        telemetry.generateStep(
-                                session,
-                                sensors,
-                                halted,
-                                temperatureWorkloadByMachine,
-                                vibrationWorkloadByMachine,
-                                simulatedTime,
-                                p
-                        )
+                String machineId = m.getMachineId();
+                machineRegistry.profile(machineId).ifPresent(profile ->
+                        telemetry.generateStep(session, sensors, halted, workloadByMachineMetric, simulatedTime, profile)
                 );
             }
 
@@ -281,8 +271,7 @@ public class SimulationEngine implements DisposableBean {
             }
 
             session.fireAllRules();
-
-            insertTickStatusForAllMachines(halted);
+            insertTickFactsForAllMachines(halted);
             session.fireAllRules();
 
             sensorTraceThisTick.add(SimulatedTelemetry.copySensorsSnapshot(sensors));
@@ -297,32 +286,34 @@ public class SimulationEngine implements DisposableBean {
         }
     }
 
-    private void insertTickStatusForAllMachines(Set<String> haltedMachineIds) {
+    private void insertTickFactsForAllMachines(Set<String> haltedMachineIds) {
         for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
             String id = m.getMachineId();
-            if (id == null) {
+            if (id == null || haltedMachineIds.contains(id)) {
                 continue;
             }
-            if (haltedMachineIds.contains(id)) {
-                continue;
-            }
-            double temp = latestSensorValueOrNaN(id, TelemetryMetric.TEMPERATURE_C);
-            double vib = latestSensorValueOrNaN(id, TelemetryMetric.VIBRATION_RMS);
-            boolean stress = machineRegistry.profile(id)
-                    .map(p -> p.sustainedStressBandActive(temp, vib))
-                    .orElse(false);
+            MachineProcessProfile profile = machineRegistry.require(id);
+            Map<String, Double> valuesByMetric = latestValuesByMetric(profile);
+            boolean stress = profile.sustainedStressBandActive(valuesByMetric);
             long idx = tickIndexByMachine.getOrDefault(id, 0L) + 1L;
             tickIndexByMachine.put(id, idx);
-            session.insert(new TickStatus(id, stress, temp, vib, idx, simulatedTime.toEpochMilli()));
+            session.insert(new TickStatus(id, stress, idx, simulatedTime.toEpochMilli()));
+            for (MetricProfile metric : profile.metrics()) {
+                double v = valuesByMetric.getOrDefault(metric.metricKey(), Double.NaN);
+                if (!Double.isNaN(v)) {
+                    session.insert(new MetricTick(id, metric.metricKey(), v, idx, simulatedTime.toEpochMilli()));
+                }
+            }
         }
     }
 
-    private double latestSensorValueOrNaN(String machineId, TelemetryMetric metric) {
-        SensorStatus s = sensors.get(machineId + ":" + metric.name());
-        if (s == null) {
-            return Double.NaN;
+    private Map<String, Double> latestValuesByMetric(MachineProcessProfile profile) {
+        Map<String, Double> values = new LinkedHashMap<>();
+        for (MetricProfile metric : profile.metrics()) {
+            SensorStatus s = sensors.get(profile.machineId() + ":" + metric.metricKey());
+            values.put(metric.metricKey(), s == null ? Double.NaN : s.getValue());
         }
-        return s.getValue();
+        return values;
     }
 
     private void refreshSimulatedClock() {
@@ -340,6 +331,7 @@ public class SimulationEngine implements DisposableBean {
                     simulatedTime.minus(p.componentAgeAtStart()),
                     p.serviceInterval()
             ));
+            telemetry.resetToNominal(sensors, simulatedTime, p);
         }
         session.insert(new SimulatedClock(simulatedTime));
     }

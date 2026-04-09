@@ -1,11 +1,10 @@
 package com.luka.kbpdm.simulation.report;
 
-import com.luka.kbpdm.api.MachineWorkload;
-import com.luka.kbpdm.api.RuleFiring;
-import com.luka.kbpdm.api.SensorStatus;
-import com.luka.kbpdm.api.SimulationReport;
+import com.luka.kbpdm.api.*;
 import com.luka.kbpdm.domain.*;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
+import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.kie.api.runtime.KieSession;
 
 import java.time.Instant;
@@ -20,9 +19,8 @@ public final class SimulationSnapshotBuilder {
             Instant simulatedTime,
             KieSession session,
             Map<String, SensorStatus> sensors,
-            Map<String, MachineWorkload> temperatureWorkloadByMachine,
-            Map<String, MachineWorkload> vibrationWorkloadByMachine,
-            List<String> machineIdsOrdered,
+            Map<String, Map<String, MachineWorkload>> workloadByMachineMetric,
+            List<MachineProcessProfile> machineProfiles,
             List<List<SensorStatus>> sensorTraceThisTick,
             List<RuleFiring> rulesFromLastCompletedTick
     ) {
@@ -30,15 +28,8 @@ public final class SimulationSnapshotBuilder {
         r.setTickMinutes(tickMinutes);
         r.setSimulatedTime(simulatedTime);
         r.setSafetyHaltedMachineIds(new ArrayList<>(WorkingMemoryOps.haltedMachineIds(session)));
-
-        Map<String, MachineWorkload> tw = new LinkedHashMap<>();
-        Map<String, MachineWorkload> vw = new LinkedHashMap<>();
-        for (String id : machineIdsOrdered) {
-            tw.put(id, temperatureWorkloadByMachine.getOrDefault(id, MachineWorkload.NORMAL));
-            vw.put(id, vibrationWorkloadByMachine.getOrDefault(id, MachineWorkload.NORMAL));
-        }
-        r.setMachineTemperatureWorkloads(tw);
-        r.setMachineVibrationWorkloads(vw);
+        r.setMachineProfiles(toMachineProfileViews(machineProfiles));
+        r.setMachineMetricWorkloads(copyWorkloads(workloadByMachineMetric, machineProfiles));
 
         r.setMachines(WorkingMemoryOps.getFacts(session, Machine.class));
         r.setTelemetry(List.of());
@@ -57,6 +48,43 @@ public final class SimulationSnapshotBuilder {
         r.setSafetyResults(sortSafetyResults(new ArrayList<>(WorkingMemoryOps.getFacts(session, SafetyResult.class)), nameByMachineId));
         r.setRulesFiredThisTick(new ArrayList<>(rulesFromLastCompletedTick));
         return r;
+    }
+
+    private static List<MachineProfileView> toMachineProfileViews(List<MachineProcessProfile> profiles) {
+        List<MachineProfileView> out = new ArrayList<>(profiles.size());
+        for (MachineProcessProfile p : profiles) {
+            List<MetricProfileView> metrics = new ArrayList<>();
+            for (MetricProfile m : p.metrics()) {
+                metrics.add(new MetricProfileView(
+                        m.metricKey(),
+                        m.displayName(),
+                        m.unit(),
+                        m.decimals(),
+                        m.workloadEnabled(),
+                        m.trendEnabled(),
+                        m.hasAnomalyThreshold(),
+                        m.hasStressThreshold()
+                ));
+            }
+            out.add(new MachineProfileView(p.machineId(), p.displayName(), p.machineType(), metrics));
+        }
+        return out;
+    }
+
+    private static Map<String, Map<String, MachineWorkload>> copyWorkloads(
+            Map<String, Map<String, MachineWorkload>> source,
+            List<MachineProcessProfile> profiles
+    ) {
+        Map<String, Map<String, MachineWorkload>> out = new LinkedHashMap<>();
+        for (MachineProcessProfile p : profiles) {
+            Map<String, MachineWorkload> row = new LinkedHashMap<>();
+            Map<String, MachineWorkload> srcRow = source.getOrDefault(p.machineId(), Map.of());
+            for (MetricProfile m : p.metrics()) {
+                row.put(m.metricKey(), srcRow.getOrDefault(m.metricKey(), MachineWorkload.NORMAL));
+            }
+            out.put(p.machineId(), row);
+        }
+        return out;
     }
 
     private static List<List<SensorStatus>> copySensorTrace(List<List<SensorStatus>> trace) {

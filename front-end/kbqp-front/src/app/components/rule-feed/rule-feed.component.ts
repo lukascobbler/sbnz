@@ -1,5 +1,7 @@
+import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RuleFiring } from '../../models/simulation.types';
+import { machineAccentClass } from '../../utils/machine-accent';
 import { PrettyDatePipe } from '../../pipes/pretty-date.pipe';
 import { InfoDialogButtonComponent } from '../info-dialog-button/info-dialog-button.component';
 import { RuleCatalogInlineComponent } from '../rule-catalog-inline/rule-catalog-inline.component';
@@ -17,11 +19,13 @@ interface TickRuleGroup {
 @Component({
   selector: 'rule-feed',
   standalone: true,
-  imports: [PrettyDatePipe, InfoDialogButtonComponent, RuleCatalogInlineComponent],
+  imports: [NgClass, PrettyDatePipe, InfoDialogButtonComponent, RuleCatalogInlineComponent],
   templateUrl: './rule-feed.component.html',
   styleUrl: './rule-feed.component.scss',
 })
 export class RuleFeedComponent {
+  protected readonly machineAccentClass = machineAccentClass;
+
   @Input({ required: true }) rules: RuleFiring[] = [];
   @Input({ required: true }) tickEndTime: string | null = null;
 
