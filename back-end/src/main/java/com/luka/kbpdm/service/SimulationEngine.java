@@ -99,8 +99,7 @@ public class SimulationEngine implements DisposableBean {
                     String name = event.getMatch().getRule().getName();
                     Instant at = simulatedTime;
                     String machineId = RuleMatchModel.inferMachineIdFromMatch(event);
-                    String out = RuleMatchModel.summarizeMatch(event);
-                    rulesCollectedThisTick.add(new RuleFiring(name, machineId, out, at));
+                    rulesCollectedThisTick.add(new RuleFiring(name, machineId, at));
                 }
             }
         });
@@ -184,10 +183,11 @@ public class SimulationEngine implements DisposableBean {
         }
 
         refreshSimulatedClock();
-        rulesCollectedThisTick.clear();
+        // Do not clear rulesCollectedThisTick or call finalizeTickReporting() here: Fix is not a
+        // simulation tick. Replacing rulesFromLastCompletedTick would wipe the rule feed from the
+        // last step the user actually ran.
         session.insert(new SafetyCheck(machineId, Duration.ofHours(24), simulatedTime));
         session.fireAllRules();
-        finalizeTickReporting();
         broadcastSnapshot();
     }
 

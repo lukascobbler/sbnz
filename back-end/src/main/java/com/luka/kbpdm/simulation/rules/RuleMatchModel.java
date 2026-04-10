@@ -32,66 +32,6 @@ public final class RuleMatchModel {
         return String.join(", ", ids);
     }
 
-    public static String summarizeMatch(AfterMatchFiredEvent event) {
-        List<String> parts = new ArrayList<>();
-        for (Object o : event.getMatch().getObjects()) {
-            String s = summarizeFact(o);
-            if (s != null) {
-                parts.add(s);
-            }
-        }
-        if (parts.isEmpty()) {
-            return "";
-        }
-        if (parts.size() > 3) {
-            parts = new ArrayList<>(parts.subList(0, 3));
-            parts.add("…");
-        }
-        return String.join(", ", parts);
-    }
-
-    private static String summarizeFact(Object o) {
-        if (o instanceof Machine m) {
-            return "Machine(" + m.getType() + ")";
-        }
-        if (o instanceof TelemetryReading r) {
-            String v = String.format(Locale.ROOT, "%.2f", r.getValue());
-            return "Reading(" + r.getMetric() + "=" + v + ")";
-        }
-        if (o instanceof Anomaly a) {
-            if (a.getMetricKey() != null) {
-                return "Anomaly(" + a.getType() + ":" + a.getMetricKey() + ")";
-            }
-            return "Anomaly(" + a.getType() + ")";
-        }
-        if (o instanceof Intervention i) {
-            return "Intervention(" + i.getPriority() + ")";
-        }
-        if (o instanceof UnsafeReason u) {
-            if (u.getDetails() != null && !u.getDetails().isBlank()) {
-                return "Unsafe(" + u.getCode() + ":" + u.getDetails() + ")";
-            }
-            return "Unsafe(" + u.getCode() + ")";
-        }
-        if (o instanceof SafetyCheck) {
-            return "SafetyCheck";
-        }
-        if (o instanceof SafetyResult s) {
-            return s.isSafe() ? "SAFE" : "UNSAFE";
-        }
-        if (o instanceof TickStatus t) {
-            return t.isSustainedStressPresent() ? "Tick(stress)" : "Tick(ok)";
-        }
-        if (o instanceof MetricTick t) {
-            String v = String.format(Locale.ROOT, "%.2f", t.getValue());
-            return "MetricTick(" + t.getMetricKey() + "=" + v + ")";
-        }
-        if (o instanceof MachineHalted) {
-            return "HALTED";
-        }
-        return null;
-    }
-
     private static String machineIdFromFact(Object o) {
         if (o instanceof Machine m) {
             return m.getMachineId();
@@ -122,6 +62,9 @@ public final class RuleMatchModel {
         }
         if (o instanceof MetricTick t) {
             return t.getMachineId();
+        }
+        if (o instanceof CurrentMetric c) {
+            return c.getMachineId();
         }
         return null;
     }

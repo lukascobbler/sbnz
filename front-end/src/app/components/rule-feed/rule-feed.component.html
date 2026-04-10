@@ -2,7 +2,7 @@
   <aside class="panel-side">
     <info-dialog-btn
       title="Rule feed (this tick)"
-      body="Rules that fired during the last completed simulation tick, grouped by simulated time (tick). Within each tick, rules are grouped again by machine, then ordered by rule name. Columns: machine, rule name, and a short output/match summary."
+      body="Rules that fired during the last completed simulation tick, grouped by simulated time (tick). Within each tick, rules are grouped again by machine, then ordered by rule name."
     />
   </aside>
   <div class="panel-content">
@@ -13,7 +13,6 @@
     <div class="table rules rules-feed-table">
       <div class="table-head rules-feed-grid-tick">
         <div class="th">Rule</div>
-        <div class="th">Output</div>
       </div>
 
       <div class="table-body rules-feed-body scroll-pad">
@@ -33,7 +32,7 @@
                     [ngClass]="machineAccentClass(mg.machineId)"
                     >{{ mg.machineId }}</span>
                 </div>
-                @for (row of mg.rows; track row.ruleName + (row.output ?? '')) {
+                @for (row of mg.rows; track row.ruleName + (row.firedAt ?? '')) {
                   <div
                     class="tr rules-row rules-feed-grid-tick machine-accent-row"
                     [ngClass]="machineAccentClass(row.machineId)"
@@ -44,7 +43,6 @@
                         <rule-catalog-inline [ruleName]="row.ruleName" />
                       </span>
                     </div>
-                    <div class="td small wide">{{ row.output ?? '' }}</div>
                   </div>
                 }
               </div>

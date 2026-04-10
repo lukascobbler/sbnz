@@ -13,7 +13,6 @@ import java.time.Instant;
 public class RuleFiring {
     private String ruleName;
     private String machineId;
-    private String output;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant firedAt;
 }

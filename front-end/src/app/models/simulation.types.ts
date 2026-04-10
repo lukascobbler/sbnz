@@ -3,7 +3,6 @@ export type MachineWorkload = 'NORMAL' | 'OVERWORKED' | 'REST';
 export interface RuleFiring {
   ruleName: string;
   machineId: string | null;
-  output?: string | null;
   firedAt?: string | null;
 }
 

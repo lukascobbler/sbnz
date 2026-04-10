@@ -26,7 +26,7 @@ export class App {
   private readonly sim = inject(SimulationService);
   private readonly sensorHistory = inject(SensorHistoryService);
 
-  protected readonly title = signal('Knowledge-based PdM');
+  protected readonly title = signal('Predictive maintenance');
   protected readonly error = this.sim.error;
   protected readonly report = this.sim.report;
   protected readonly connected = this.sim.connected;
