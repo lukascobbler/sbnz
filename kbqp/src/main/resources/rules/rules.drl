@@ -30,6 +30,40 @@ declare MetricTick
   @timestamp( ts )
 end
 
+rule "Cross-machine: Shared environment (humidity + CNC thermal stress)"
+salience 35
+when
+  SimulatedClock( $t : now )
+  MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $idx : tickIndex, value >= 64.0 )
+  MetricTick( machineId == "CNC", metricKey == "TEMPERATURE_C", tickIndex == $idx, value >= 67.5 )
+  not Intervention( machineId == "CNC", priority == PriorityLevel.MEDIUM,
+      recommendation == "Plant humidity is elevated while CNC temperature is in the stress band: check dehumidification and coolant delivery." )
+then
+  insert(new Intervention(
+      "CNC",
+      PriorityLevel.MEDIUM,
+      "Plant humidity is elevated while CNC temperature is in the stress band: check dehumidification and coolant delivery.",
+      $t
+  ));
+end
+
+rule "Cross-machine: Upstream coupling (slow belt + low pack throughput)"
+salience 35
+when
+  SimulatedClock( $t : now )
+  MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $idx : tickIndex, value <= 84.0 )
+  MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $idx, value <= 98.0 )
+  not Intervention( machineId == "PKG", priority == PriorityLevel.HIGH,
+      recommendation == "Conveyor belt speed is low and pack line throughput is depressed: inspect upstream jam, starved infeed, or coordinated line speed." )
+then
+  insert(new Intervention(
+      "PKG",
+      PriorityLevel.HIGH,
+      "Conveyor belt speed is low and pack line throughput is depressed: inspect upstream jam, starved infeed, or coordinated line speed.",
+      $t
+  ));
+end
+
 rule "Halt: 5 consecutive ticks in critical metric stress band (OR)"
 salience 12
 when

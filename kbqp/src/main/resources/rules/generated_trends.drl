@@ -6,49 +6,96 @@ import com.luka.kbpdm.domain.SimulatedClock;
 import java.lang.Number;
 dialect "java"
 
-rule "CEP: LIN TEMPERATURE_C rising trend"
+rule "CEP: CLM AMBIENT_C rising trend"
 salience 15
 when
   SimulatedClock( $t : now )
   $maxTick : Number() from accumulate(
-    MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", $ti : tickIndex ),
+    MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", $ti : tickIndex ),
     max( $ti )
   )
-  $t11 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
-  $t10 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 1, value < $v11, $v10 : value )
-  $t9 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 2, value < $v10, $v9 : value )
-  $t8 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 3, value < $v9, $v8 : value )
-  $t7 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 4, value < $v8, $v7 : value )
-  $t6 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 5, value < $v7, $v6 : value )
-  $t5 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 6, value < $v6, $v5 : value )
-  $t4 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 7, value < $v5, $v4 : value )
-  $t3 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 8, value < $v4, $v3 : value )
-  $t2 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 9, value < $v3, $v2 : value )
-  $t1 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i11 - 10, value < $v2, $v1 : value )
-  not Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "TEMPERATURE_C" )
+  $t11 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "AMBIENT_C" )
 then
   insert(new Anomaly(
-      "LIN",
+      "CLM",
       AnomalyType.RISING_TREND,
-      "TEMPERATURE_C",
-      "Temperature (TEMPERATURE_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "AMBIENT_C",
+      "Ambient temperature (AMBIENT_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
       $t
   ));
 end
-rule "CEP: LIN TEMPERATURE_C rising trend cleared"
+rule "CEP: CLM AMBIENT_C rising trend cleared"
 salience 16
 when
-  $a : Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "TEMPERATURE_C" )
+  $a : Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "AMBIENT_C" )
   $maxTick : Number() from accumulate(
-    MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", $ti : tickIndex ),
+    MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", $ti : tickIndex ),
     max( $ti )
   )
-  $c6 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
-  $c5 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i6 - 1, value > $w6, $w5 : value )
-  $c4 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i6 - 2, value > $w5, $w4 : value )
-  $c3 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i6 - 3, value > $w4, $w3 : value )
-  $c2 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i6 - 4, value > $w3, $w2 : value )
-  $c1 : MetricTick( machineId == "LIN", metricKey == "TEMPERATURE_C", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+  $c6 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "CLM", metricKey == "AMBIENT_C", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: CLM HUMIDITY_PCT rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "HUMIDITY_PCT" )
+then
+  insert(new Anomaly(
+      "CLM",
+      AnomalyType.RISING_TREND,
+      "HUMIDITY_PCT",
+      "Humidity (HUMIDITY_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: CLM HUMIDITY_PCT rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "HUMIDITY_PCT" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", tickIndex == $i6 - 5, value > $w2, $w1 : value )
 then
   delete( $a );
 end
@@ -96,6 +143,53 @@ when
   $c3 : MetricTick( machineId == "LIN", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 3, value > $w4, $w3 : value )
   $c2 : MetricTick( machineId == "LIN", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 4, value > $w3, $w2 : value )
   $c1 : MetricTick( machineId == "LIN", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: LIN BELT_SPEED_PCT rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "BELT_SPEED_PCT" )
+then
+  insert(new Anomaly(
+      "LIN",
+      AnomalyType.RISING_TREND,
+      "BELT_SPEED_PCT",
+      "Belt speed (BELT_SPEED_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: LIN BELT_SPEED_PCT rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "BELT_SPEED_PCT" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", tickIndex == $i6 - 5, value > $w2, $w1 : value )
 then
   delete( $a );
 end
@@ -190,6 +284,194 @@ when
   $c3 : MetricTick( machineId == "CNC", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 3, value > $w4, $w3 : value )
   $c2 : MetricTick( machineId == "CNC", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 4, value > $w3, $w2 : value )
   $c1 : MetricTick( machineId == "CNC", metricKey == "VIBRATION_RMS", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: CNC SPINDLE_LOAD_PCT rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "CNC", type == AnomalyType.RISING_TREND, metricKey == "SPINDLE_LOAD_PCT" )
+then
+  insert(new Anomaly(
+      "CNC",
+      AnomalyType.RISING_TREND,
+      "SPINDLE_LOAD_PCT",
+      "Spindle load (SPINDLE_LOAD_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: CNC SPINDLE_LOAD_PCT rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "CNC", type == AnomalyType.RISING_TREND, metricKey == "SPINDLE_LOAD_PCT" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: PKG CASES_PER_MIN rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "CASES_PER_MIN" )
+then
+  insert(new Anomaly(
+      "PKG",
+      AnomalyType.RISING_TREND,
+      "CASES_PER_MIN",
+      "Throughput (CASES_PER_MIN) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: PKG CASES_PER_MIN rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "CASES_PER_MIN" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: PKG REJECT_PCT rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "REJECT_PCT" )
+then
+  insert(new Anomaly(
+      "PKG",
+      AnomalyType.RISING_TREND,
+      "REJECT_PCT",
+      "Reject rate (REJECT_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: PKG REJECT_PCT rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "REJECT_PCT" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "PKG", metricKey == "REJECT_PCT", tickIndex == $i6 - 5, value > $w2, $w1 : value )
+then
+  delete( $a );
+end
+
+rule "CEP: PKG SEAL_TEMP_C rising trend"
+salience 15
+when
+  SimulatedClock( $t : now )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", $ti : tickIndex ),
+    max( $ti )
+  )
+  $t11 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", $i11 : tickIndex == $maxTick.longValue(), $v11 : value )
+  $t10 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 1, value < $v11, $v10 : value )
+  $t9 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 2, value < $v10, $v9 : value )
+  $t8 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 3, value < $v9, $v8 : value )
+  $t7 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 4, value < $v8, $v7 : value )
+  $t6 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 5, value < $v7, $v6 : value )
+  $t5 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 6, value < $v6, $v5 : value )
+  $t4 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 7, value < $v5, $v4 : value )
+  $t3 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 8, value < $v4, $v3 : value )
+  $t2 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 9, value < $v3, $v2 : value )
+  $t1 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i11 - 10, value < $v2, $v1 : value )
+  not Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "SEAL_TEMP_C" )
+then
+  insert(new Anomaly(
+      "PKG",
+      AnomalyType.RISING_TREND,
+      "SEAL_TEMP_C",
+      "Seal temperature (SEAL_TEMP_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      $t
+  ));
+end
+rule "CEP: PKG SEAL_TEMP_C rising trend cleared"
+salience 16
+when
+  $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "SEAL_TEMP_C" )
+  $maxTick : Number() from accumulate(
+    MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", $ti : tickIndex ),
+    max( $ti )
+  )
+  $c6 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", $i6 : tickIndex == $maxTick.longValue(), $w6 : value )
+  $c5 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i6 - 1, value > $w6, $w5 : value )
+  $c4 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i6 - 2, value > $w5, $w4 : value )
+  $c3 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i6 - 3, value > $w4, $w3 : value )
+  $c2 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i6 - 4, value > $w3, $w2 : value )
+  $c1 : MetricTick( machineId == "PKG", metricKey == "SEAL_TEMP_C", tickIndex == $i6 - 5, value > $w2, $w1 : value )
 then
   delete( $a );
 end

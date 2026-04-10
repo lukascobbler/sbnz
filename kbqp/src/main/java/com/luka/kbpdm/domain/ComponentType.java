@@ -3,6 +3,8 @@ package com.luka.kbpdm.domain;
 public enum ComponentType {
     BEARING,
     MOTOR,
-    GEARBOX
+    GEARBOX,
+    ENV_SENSOR,
+    SEALING
 }
 

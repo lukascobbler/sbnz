@@ -3,6 +3,8 @@ package com.luka.kbpdm.domain;
 public enum MachineType {
     CNC,
     CONVEYOR,
-    PRESS
+    PRESS,
+    CLIMATE,
+    PACK_LINE
 }
 

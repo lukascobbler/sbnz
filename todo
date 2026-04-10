@@ -1,0 +1,33 @@
+Sensors (latest)
+Shows the current system state coming from the “world”: the latest telemetry reading per machine/metric (e.g., temperature, vibration).
+This is the “input layer” for rule reasoning.
+
+Rule feed (live)
+A chronological log of what the rule engine is doing: every time a rule fires, it appears here with the simulated time.
+This helps you verify chaining/CEP behavior and understand “why did this happen now?”.
+
+Anomalies
+These are higher-level diagnoses derived from raw sensor states/events.
+Example: “Potential bearing failure” is created when conditions like high temperature + high vibration co-occur (your Level 2 reasoning).
+
+Interventions
+These are recommended actions / priorities derived from anomalies + context (e.g., main line vs not).
+This is Level 3 reasoning: “Given the anomaly, what should we do and how urgent is it?”
+
+Safety
+This is the engine answering the query “is it safe for the next 24h?” based on component health + service intervals, updated over time.
+In the overall system, it’s the “decision/assessment” output parallel to interventions.
+
+
+--------------------------
+
+triple chaining metrika fali, kombinuj CLM sa CNC i vidi sta se desava sa humidity + ambient temperaturom
+
+------------------------
+
+add rules panel that separates level 1, level 2, level 3, CEP, backward chaining rules (states, anomalies, interventions, queries) and make it fully compatible with the ? button in the rule feed
+
+fix rule name for CEP rule in rule feed
+
+remove all comments
+

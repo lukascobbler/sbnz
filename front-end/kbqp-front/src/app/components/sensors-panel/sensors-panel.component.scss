@@ -87,7 +87,7 @@
 
 .table.sensors.sensors-grouped .sensors-grouped-head,
 .table.sensors.sensors-grouped .sensor-metric-row {
-  grid-template-columns: 1fr 78px minmax(108px, 1fr);
+  grid-template-columns: 2fr 78px minmax(108px, 1fr);
 }
 
 .sensors-grouped-body {
@@ -103,8 +103,8 @@
 }
 
 .sensor-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  width: 100%;
   gap: 8px;
 }
 
@@ -116,6 +116,7 @@
 
 .sensor-metric-card {
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 5px;
   min-width: 0;
@@ -201,7 +202,7 @@
 }
 
 .sensor-metric-row {
-  grid-template-columns: 1fr 78px minmax(108px, 1fr);
+  grid-template-columns: 2fr 68px minmax(108px, 1fr);
   padding: 6px 8px;
 }
 

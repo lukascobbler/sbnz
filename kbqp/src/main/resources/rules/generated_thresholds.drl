@@ -6,19 +6,36 @@ import com.luka.kbpdm.domain.AnomalyType;
 import com.luka.kbpdm.domain.SimulatedClock;
 dialect "java"
 
-rule "Threshold: LIN TEMPERATURE_C high"
+rule "Threshold: CLM AMBIENT_C high"
 salience 50
 when
   SimulatedClock( $t : now )
-  $m : Machine( machineId == "LIN" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "TEMPERATURE_C", value >= 86.0 )
-  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "TEMPERATURE_C" )
+  $m : Machine( machineId == "CLM" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "AMBIENT_C", value >= 29.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "AMBIENT_C" )
 then
   insert(new Anomaly(
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
-      "TEMPERATURE_C",
-      "Temperature reached or exceeded the configured high band for this machine.",
+      "AMBIENT_C",
+      "Ambient temperature reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
+
+rule "Threshold: CLM HUMIDITY_PCT high"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "CLM" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "HUMIDITY_PCT", value >= 64.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "HUMIDITY_PCT" )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.ABOVE_THRESHOLD,
+      "HUMIDITY_PCT",
+      "Humidity reached or exceeded the configured high band for this machine.",
       $t
   ));
 end
@@ -70,6 +87,57 @@ then
       AnomalyType.ABOVE_THRESHOLD,
       "VIBRATION_RMS",
       "Vibration reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
+
+rule "Threshold: CNC SPINDLE_LOAD_PCT high"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "CNC" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "SPINDLE_LOAD_PCT", value >= 93.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SPINDLE_LOAD_PCT" )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.ABOVE_THRESHOLD,
+      "SPINDLE_LOAD_PCT",
+      "Spindle load reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
+
+rule "Threshold: PKG REJECT_PCT high"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "PKG" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "REJECT_PCT", value >= 4.5 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "REJECT_PCT" )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.ABOVE_THRESHOLD,
+      "REJECT_PCT",
+      "Reject rate reached or exceeded the configured high band for this machine.",
+      $t
+  ));
+end
+
+rule "Threshold: PKG SEAL_TEMP_C high"
+salience 50
+when
+  SimulatedClock( $t : now )
+  $m : Machine( machineId == "PKG" )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "SEAL_TEMP_C", value >= 105.0 )
+  not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SEAL_TEMP_C" )
+then
+  insert(new Anomaly(
+      $m.getMachineId(),
+      AnomalyType.ABOVE_THRESHOLD,
+      "SEAL_TEMP_C",
+      "Seal temperature reached or exceeded the configured high band for this machine.",
       $t
   ));
 end

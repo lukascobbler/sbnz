@@ -3,7 +3,6 @@ package com.luka.kbpdm.simulation.machines;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,9 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.luka.kbpdm.domain.ComponentType.BEARING;
+import static com.luka.kbpdm.domain.ComponentType.ENV_SENSOR;
 import static com.luka.kbpdm.domain.ComponentType.MOTOR;
+import static com.luka.kbpdm.domain.ComponentType.SEALING;
 import static com.luka.kbpdm.domain.MachineType.CNC;
+import static com.luka.kbpdm.domain.MachineType.CLIMATE;
 import static com.luka.kbpdm.domain.MachineType.CONVEYOR;
+import static com.luka.kbpdm.domain.MachineType.PACK_LINE;
 
 @Component
 public final class MachineProcessRegistry {
@@ -22,7 +25,7 @@ public final class MachineProcessRegistry {
     private final Map<String, MachineProcessProfile> byId;
 
     public MachineProcessRegistry() {
-        this.orderedProfiles = List.of(conveyorLine(), cncMill());
+        this.orderedProfiles = List.of(plantClimate(), conveyorLine(), cncMill(), packLine());
         Map<String, MachineProcessProfile> map = new LinkedHashMap<>();
         for (MachineProcessProfile p : orderedProfiles) {
             map.put(p.machineId(), p);
@@ -30,6 +33,23 @@ public final class MachineProcessRegistry {
         this.byId = Collections.unmodifiableMap(map);
     }
 
+    /** No stress metrics: ambient + humidity monitoring only. */
+    private static MachineProcessProfile plantClimate() {
+        return new MachineProcessProfile(
+                "CLM",
+                "Plant climate",
+                CLIMATE,
+                ENV_SENSOR,
+                Duration.ofDays(365),
+                Duration.ofDays(120),
+                List.of(
+                        new MetricProfile("AMBIENT_C", "Ambient temperature", "C", 1, 21.0, 0.14, 29.0, null, true, false),
+                        new MetricProfile("HUMIDITY_PCT", "Humidity", "%RH", 1, 52.0, 0.75, 64.0, null, true, false)
+                )
+        );
+    }
+
+    /** Single stress metric (vibration); belt speed is observational with workload only. */
     private static MachineProcessProfile conveyorLine() {
         return new MachineProcessProfile(
                 "LIN",
@@ -39,23 +59,42 @@ public final class MachineProcessRegistry {
                 Duration.ofDays(30),
                 Duration.ofDays(25),
                 List.of(
-                        new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 69.0, 0.55, 86.0, 78.0, true, true),
-                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 4.4, 3.85, true, true)
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 4.4, 3.85, true, true),
+                        new MetricProfile("BELT_SPEED_PCT", "Belt speed", "%", 1, 95.0, 0.95, null, null, true, true)
                 )
         );
     }
 
+    /** Three stress metrics: thermal, vibration, spindle load. */
     private static MachineProcessProfile cncMill() {
         return new MachineProcessProfile(
                 "CNC",
-                "CNC Mill",
+                "CNC mill",
                 CNC,
                 MOTOR,
                 Duration.ofDays(90),
                 Duration.ofDays(10),
                 List.of(
                         new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 59.0, 0.28, 78.0, 67.5, true, true),
-                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.9, 5.35, true, true)
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.9, 5.35, true, true),
+                        new MetricProfile("SPINDLE_LOAD_PCT", "Spindle load", "%", 1, 72.0, 1.05, 93.0, 84.0, true, true)
+                )
+        );
+    }
+
+    /** One stress metric (seal temperature); throughput and rejects monitored. */
+    private static MachineProcessProfile packLine() {
+        return new MachineProcessProfile(
+                "PKG",
+                "Auto packer",
+                PACK_LINE,
+                SEALING,
+                Duration.ofDays(45),
+                Duration.ofDays(14),
+                List.of(
+                        new MetricProfile("CASES_PER_MIN", "Throughput", "cases/min", 1, 118.0, 2.4, null, null, true, true),
+                        new MetricProfile("REJECT_PCT", "Reject rate", "%", 2, 1.8, 0.1, 4.5, null, true, false),
+                        new MetricProfile("SEAL_TEMP_C", "Seal temperature", "C", 1, 88.0, 0.32, 105.0, 99.0, true, true)
                 )
         );
     }
