@@ -12,6 +12,7 @@ import com.luka.kbpdm.domain.SimulatedClock;
 import com.luka.kbpdm.domain.MachineHalted;
 import com.luka.kbpdm.domain.TickStatus;
 import com.luka.kbpdm.domain.MetricTick;
+import com.luka.kbpdm.domain.CurrentMetric;
 
 dialect "java"
 
@@ -30,38 +31,68 @@ declare MetricTick
   @timestamp( ts )
 end
 
-rule "Cross-machine: Shared environment (humidity + CNC thermal stress)"
+rule "Cross-machine: Pushed line (high belt speed + LIN vibration + high pack throughput)"
 salience 35
 when
   SimulatedClock( $t : now )
-  MetricTick( machineId == "CLM", metricKey == "HUMIDITY_PCT", $idx : tickIndex, value >= 64.0 )
-  MetricTick( machineId == "CNC", metricKey == "TEMPERATURE_C", tickIndex == $idx, value >= 67.5 )
-  not Intervention( machineId == "CNC", priority == PriorityLevel.MEDIUM,
-      recommendation == "Plant humidity is elevated while CNC temperature is in the stress band: check dehumidification and coolant delivery." )
+  CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
+  CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
+  CurrentMetric( machineId == "PKG", metricKey == "CASES_PER_MIN", value >= 125.0 )
+  not Intervention( sourceRule == "X_PUSHED_LINE" )
 then
   insert(new Intervention(
-      "CNC",
-      PriorityLevel.MEDIUM,
-      "Plant humidity is elevated while CNC temperature is in the stress band: check dehumidification and coolant delivery.",
+      "LIN",
+      PriorityLevel.HIGH,
+      "X_PUSHED_LINE",
+      "Line is being pushed (high belt speed + high pack throughput) while conveyor vibration is elevated: reduce line speed and inspect bearings/alignment.",
       $t
   ));
 end
 
-rule "Cross-machine: Upstream coupling (slow belt + low pack throughput)"
-salience 35
+rule "Cross-machine: LIN instability under speed (vibration warning + rising rejects)"
+salience 34
 when
   SimulatedClock( $t : now )
-  MetricTick( machineId == "LIN", metricKey == "BELT_SPEED_PCT", $idx : tickIndex, value <= 84.0 )
-  MetricTick( machineId == "PKG", metricKey == "CASES_PER_MIN", tickIndex == $idx, value <= 98.0 )
-  not Intervention( machineId == "PKG", priority == PriorityLevel.HIGH,
-      recommendation == "Conveyor belt speed is low and pack line throughput is depressed: inspect upstream jam, starved infeed, or coordinated line speed." )
+  CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
+  CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
+  CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2 )
+  not Intervention( sourceRule == "X_LIN_INSTABILITY" )
 then
   insert(new Intervention(
-      "PKG",
-      PriorityLevel.HIGH,
-      "Conveyor belt speed is low and pack line throughput is depressed: inspect upstream jam, starved infeed, or coordinated line speed.",
+      "LIN",
+      PriorityLevel.MEDIUM,
+      "X_LIN_INSTABILITY",
+      "Conveyor vibration is trending high at elevated belt speed while downstream rejects increase: inspect belt tracking, tension, and bearing condition.",
       $t
   ));
+end
+
+rule "Clear intervention: pushed line resolved"
+salience 5
+when
+  SimulatedClock( $t : now )
+  $i : Intervention( sourceRule == "X_PUSHED_LINE", decidedAt != null, decidedAt < $t )
+  not(
+    CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
+    and CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
+    and CurrentMetric( machineId == "PKG", metricKey == "CASES_PER_MIN", value >= 125.0 )
+  )
+then
+  delete($i);
+end
+
+rule "Clear intervention: LIN instability resolved"
+salience 5
+when
+  SimulatedClock( $t : now )
+  $i : Intervention( sourceRule == "X_LIN_INSTABILITY", decidedAt != null, decidedAt < $t )
+  not(
+    CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
+    and CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
+    and CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2 )
+  )
+then
+  delete($i);
 end
 
 rule "Halt: 5 consecutive ticks in critical metric stress band (OR)"

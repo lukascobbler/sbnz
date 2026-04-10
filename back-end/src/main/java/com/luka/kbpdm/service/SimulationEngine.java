@@ -287,6 +287,13 @@ public class SimulationEngine implements DisposableBean {
     }
 
     private void insertTickFactsForAllMachines(Set<String> haltedMachineIds) {
+        Map<String, CurrentMetric> currentByKey = new HashMap<>();
+        for (CurrentMetric cm : WorkingMemoryOps.getFacts(session, CurrentMetric.class)) {
+            if (cm.getMachineId() != null && cm.getMetricKey() != null) {
+                currentByKey.put(cm.getMachineId() + ":" + cm.getMetricKey(), cm);
+            }
+        }
+
         for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
             String id = m.getMachineId();
             if (id == null || haltedMachineIds.contains(id)) {
@@ -302,6 +309,16 @@ public class SimulationEngine implements DisposableBean {
                 double v = valuesByMetric.getOrDefault(metric.metricKey(), Double.NaN);
                 if (!Double.isNaN(v)) {
                     session.insert(new MetricTick(id, metric.metricKey(), v, idx, simulatedTime.toEpochMilli()));
+
+                    String cmKey = id + ":" + metric.metricKey();
+                    CurrentMetric existing = currentByKey.get(cmKey);
+                    if (existing == null) {
+                        session.insert(new CurrentMetric(id, metric.metricKey(), v, simulatedTime.toEpochMilli()));
+                    } else {
+                        existing.setValue(v);
+                        existing.setTs(simulatedTime.toEpochMilli());
+                        session.update(session.getFactHandle(existing), existing);
+                    }
                 }
             }
         }

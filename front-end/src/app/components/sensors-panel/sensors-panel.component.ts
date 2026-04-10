@@ -88,10 +88,33 @@ export class SensorsPanelComponent implements OnChanges {
       for (const m of profile?.metrics ?? []) {
         metricMap.set(m.metricKey, m);
       }
+      const workloadMetrics = (profile?.metrics ?? []).filter((m) => m.workloadEnabled);
+      const workloadOrder = new Map<string, number>();
+      for (let i = 0; i < workloadMetrics.length; i++) {
+        workloadOrder.set(workloadMetrics[i]!.metricKey, i);
+      }
+      const profileOrder = new Map<string, number>();
+      for (let i = 0; i < (profile?.metrics ?? []).length; i++) {
+        profileOrder.set(profile!.metrics[i]!.metricKey, i);
+      }
+
       const rowViews: SensorRowView[] = rows
         .map((status) => ({ status, metricProfile: metricMap.get(status.metric) ?? null }))
-        .sort((a, b) => this.metricDisplayName(a).localeCompare(this.metricDisplayName(b)));
-      const workloadMetrics = (profile?.metrics ?? []).filter((m) => m.workloadEnabled);
+        .sort((a, b) => {
+          const ak = a.status.metric;
+          const bk = b.status.metric;
+          const aWork = workloadOrder.has(ak);
+          const bWork = workloadOrder.has(bk);
+          if (aWork && bWork) return (workloadOrder.get(ak) ?? 0) - (workloadOrder.get(bk) ?? 0);
+          if (aWork) return -1;
+          if (bWork) return 1;
+          const ao = profileOrder.get(ak);
+          const bo = profileOrder.get(bk);
+          if (ao != null && bo != null) return ao - bo;
+          if (ao != null) return -1;
+          if (bo != null) return 1;
+          return this.metricDisplayName(a).localeCompare(this.metricDisplayName(b));
+        });
       const slug = machineId.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
       out.push({
         machineId,

@@ -25,6 +25,7 @@ export interface Anomaly {
 export interface Intervention {
   machineId: string;
   priority: string;
+  sourceRule?: string | null;
   recommendation: string;
   decidedAt: string;
 }

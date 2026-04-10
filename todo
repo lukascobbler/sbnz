@@ -18,11 +18,6 @@ Safety
 This is the engine answering the query “is it safe for the next 24h?” based on component health + service intervals, updated over time.
 In the overall system, it’s the “decision/assessment” output parallel to interventions.
 
-
---------------------------
-
-triple chaining metrika fali, kombinuj CLM sa CNC i vidi sta se desava sa humidity + ambient temperaturom
-
 ------------------------
 
 add rules panel that separates level 1, level 2, level 3, CEP, backward chaining rules (states, anomalies, interventions, queries) and make it fully compatible with the ? button in the rule feed
