@@ -22,7 +22,6 @@ public final class WorkingMemoryOps {
         return out;
     }
 
-    /** Machines in an operator-halt state (stress halt inserts {@code UnsafeReason} with this code). */
     public static final String OPERATOR_HALT_CODE = "OPERATOR_HALT";
 
     public static Set<String> haltedMachineIds(KieSession session) {
@@ -36,10 +35,7 @@ public final class WorkingMemoryOps {
     }
 
     public static void deleteFactsOfType(KieSession session, Class<?> type) {
-        List<Object> copy = new ArrayList<>();
-        for (Object o : session.getObjects(new ClassObjectFilter(type))) {
-            copy.add(o);
-        }
+        List<Object> copy = new ArrayList<>(session.getObjects(new ClassObjectFilter(type)));
         for (Object o : copy) {
             FactHandle fh = session.getFactHandle(o);
             if (fh != null) {
@@ -48,10 +44,6 @@ public final class WorkingMemoryOps {
         }
     }
 
-    /**
-     * Removes {@link UnsafeReason} facts that are re-derived each evaluation step. Preserves
-     * {@value #OPERATOR_HALT_CODE}, which must survive across ticks (same role the former {@code MachineHalted} fact had).
-     */
     public static void deleteTransientUnsafeReasons(KieSession session) {
         for (Object o : new ArrayList<>(session.getObjects(new ClassObjectFilter(UnsafeReason.class)))) {
             UnsafeReason u = (UnsafeReason) o;

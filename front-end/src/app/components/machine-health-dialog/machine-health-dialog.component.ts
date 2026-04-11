@@ -3,7 +3,6 @@ import { MachineHealthReport } from '../../models/simulation.types';
 import { SimulationService } from '../../services/simulation.service';
 import { PrettyDatePipe } from '../../pipes/pretty-date.pipe';
 
-/** 100, 98, …, 2 — top row is 100%; one tick every 2%. */
 export const HEALTH_PERCENT_LEVELS_DESC: readonly number[] = Array.from({ length: 50 }, (_, i) => 100 - 2 * i);
 
 @Component({
@@ -49,14 +48,10 @@ export class MachineHealthDialogComponent {
     return items?.length ? [...items].reverse() : [];
   }
 
-  /** Health mapped to 2% steps (floor); ladder on/off uses this. */
   protected flooredHealth(health: number): number {
     return Math.floor(health / 2) * 2;
   }
 
-  /**
-   * Bar length: floor at 2%, 100% at 100%, centered; u^γ shapes how fast width grows up the ladder.
-   */
   protected barWidthPercent(level: number): number {
     const u = Math.max(0, Math.min(1, (level - 2) / 98));
     const minPct = 11;
@@ -64,9 +59,6 @@ export class MachineHealthDialogComponent {
     return minPct + (100 - minPct) * Math.pow(u, gamma);
   }
 
-  /**
-   * Blend red (low %) → green (high %), muted. Inactive levels stay darker but hue-matched.
-   */
   protected tickColor(level: number, health: number): string {
     const active = level <= this.flooredHealth(health);
     const t = (level - 2) / 98;

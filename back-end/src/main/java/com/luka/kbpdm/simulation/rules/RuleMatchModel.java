@@ -32,7 +32,7 @@ public final class RuleMatchModel {
             return null;
         }
         if (ids.size() == 1) {
-            return ids.iterator().next();
+            return ids.getFirst();
         }
         return String.join(", ", ids);
     }

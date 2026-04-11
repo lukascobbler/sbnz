@@ -150,10 +150,6 @@ public class SimulationEngine implements DisposableBean {
         broadcastSnapshot();
     }
 
-    public boolean hasMachine(String machineId) {
-        return machineId != null && !machineId.isBlank() && machineRegistry.hasMachine(machineId.trim());
-    }
-
     public synchronized MachineHealthReport machineHealthReport(String machineId) {
         if (session == null || machineId == null || machineId.isBlank()) {
             return null;
@@ -242,9 +238,6 @@ public class SimulationEngine implements DisposableBean {
     private static long clampTickMinutes(long tickMinutes) {
         long t = Math.max(MIN_TICK_MINUTES, Math.min(MAX_TICK_MINUTES, tickMinutes));
         t = (t / SIMULATED_MINUTES_BETWEEN_SAMPLES) * SIMULATED_MINUTES_BETWEEN_SAMPLES;
-        if (t < MIN_TICK_MINUTES) {
-            t = MIN_TICK_MINUTES;
-        }
         return t;
     }
 
@@ -288,9 +281,6 @@ public class SimulationEngine implements DisposableBean {
         }
 
         refreshSimulatedClock();
-        // Do not clear rulesCollectedThisTick or call finalizeTickReporting() here: Fix is not a
-        // simulation tick. Replacing rulesFromLastCompletedTick would wipe the rule feed from the
-        // last step the user actually ran.
         session.insert(new SafetyCheck(machineId, Duration.ofHours(24), simulatedTime));
         session.fireAllRules();
         broadcastSnapshot();

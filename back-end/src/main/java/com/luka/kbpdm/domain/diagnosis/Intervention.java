@@ -13,7 +13,6 @@ import java.time.Instant;
 public class Intervention {
     private String machineId;
     private PriorityLevel priority;
-    /** Stable identifier for the rule/source that produced this intervention. */
     private String sourceRule;
     private String recommendation;
 

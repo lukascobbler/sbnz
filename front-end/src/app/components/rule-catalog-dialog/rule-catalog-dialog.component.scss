@@ -5,7 +5,6 @@
   border-radius: 14px;
   background: #0f1628;
   color: var(--kb-text);
-  /* ~1 cm inset from viewport on all sides */
   width: calc(100vw - 2cm);
   height: calc(100vh - 2cm);
   max-width: none;
@@ -71,7 +70,6 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
-  /* No top padding so column borders align with the scroll area under the header */
   padding: 0 18px 16px;
   box-sizing: border-box;
 }

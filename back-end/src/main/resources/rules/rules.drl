@@ -142,7 +142,6 @@ then
   insert(new SafetyResult($id, true, "No safety issues detected.", $check.getCheckedAt()));
 end
 
-// Cumulative health % from Recorded* facts: −1% per anomaly, −2% per intervention, −4% per unsafe (halt) event, +1% per fix.
 query MachineHealth(String m)
   Machine(machineId == m)
   $a : Number() from accumulate(RecordedAnomaly(machineId == m), count(1))

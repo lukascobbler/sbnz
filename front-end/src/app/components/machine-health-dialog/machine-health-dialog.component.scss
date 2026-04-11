@@ -102,7 +102,6 @@
   flex: 1;
 }
 
-/* 50 rows, 2% each; 100% at top */
 .mh-tick-ladder {
   display: grid;
   grid-template-rows: repeat(50, 1fr);

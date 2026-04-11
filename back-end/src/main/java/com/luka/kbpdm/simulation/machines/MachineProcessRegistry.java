@@ -33,7 +33,6 @@ public final class MachineProcessRegistry {
         this.byId = Collections.unmodifiableMap(map);
     }
 
-    /** No stress metrics: ambient + humidity monitoring only. */
     private static MachineProcessProfile plantClimate() {
         return new MachineProcessProfile(
                 "CLM",
@@ -49,7 +48,6 @@ public final class MachineProcessRegistry {
         );
     }
 
-    /** Single stress metric (vibration); belt speed is observational with workload only. */
     private static MachineProcessProfile conveyorLine() {
         return new MachineProcessProfile(
                 "LIN",
@@ -65,7 +63,6 @@ public final class MachineProcessRegistry {
         );
     }
 
-    /** Three stress metrics: thermal, vibration, spindle load. */
     private static MachineProcessProfile cncMill() {
         return new MachineProcessProfile(
                 "CNC",
@@ -82,7 +79,6 @@ public final class MachineProcessRegistry {
         );
     }
 
-    /** One stress metric (seal temperature); throughput and rejects monitored. */
     private static MachineProcessProfile packLine() {
         return new MachineProcessProfile(
                 "PKG",
@@ -101,10 +97,6 @@ public final class MachineProcessRegistry {
 
     public List<MachineProcessProfile> profilesInOrder() {
         return orderedProfiles;
-    }
-
-    public List<String> machineIdsInOrder() {
-        return orderedProfiles.stream().map(MachineProcessProfile::machineId).toList();
     }
 
     public Optional<MachineProcessProfile> profile(String machineId) {

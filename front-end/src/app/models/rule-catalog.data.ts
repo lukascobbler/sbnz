@@ -254,7 +254,6 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
 
 const byEngineName = new Map<string, RuleCatalogEntry>(RULE_CATALOG_ENTRIES.map((r) => [r.engineName, r]));
 
-/** Clearing-rule engine name → primary card engine name (for focus / expand). */
 const primaryEngineByClearEngine = new Map<string, string>();
 for (const r of RULE_CATALOG_ENTRIES) {
   if (r.clearCounterpart) {
@@ -266,7 +265,6 @@ export function ruleCatalogEntry(engineName: string): RuleCatalogEntry | undefin
   return byEngineName.get(engineName);
 }
 
-/** If this engine name is a hidden clear rule, returns the primary card to show and highlight. */
 export function primaryEngineForClearRule(engineName: string): string | undefined {
   return primaryEngineByClearEngine.get(engineName);
 }

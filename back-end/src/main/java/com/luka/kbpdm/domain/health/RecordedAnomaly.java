@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-/** Append-only audit fact (not removed by operator Fix). */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,8 +1,6 @@
 @use 'sass:list';
 @use 'sass:color';
 
-// (border, sparkline stroke, sparkline fill) — pill text derived via lightness
-// Keep length in sync with MACHINE_ACCENT_COUNT in app/utils/machine-accent.ts
 $machine-accent-tuples: (
   (#2d6cdf, #5b94f5, #2d6cdf, #dbe8ff),
   (#c084fc, #d8b4fe, #c084fc, #f0e4ff),

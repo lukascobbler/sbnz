@@ -32,9 +32,7 @@ export class RuleCatalogDialogComponent implements AfterViewInit {
   protected readonly sectionOrder = RULE_CATALOG_SECTION_ORDER;
   protected readonly sectionLabel = RULE_CATALOG_SECTION_LABEL;
 
-  /** Card to outline when opening from the rule feed (resolves clear rules to their primary card). */
   protected highlightEngineName: string | null = null;
-  /** When the user opened from a clearing rule, outline the expanded clear block. */
   protected focusedClearRuleName: string | null = null;
 
   protected expandedClears = new Set<string>();

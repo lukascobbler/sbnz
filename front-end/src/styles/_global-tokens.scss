@@ -7,7 +7,6 @@
   --kb-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   --kb-dashboard-panel-scroll-height: min(34vh, 316px);
   --kb-results-panel-scroll-height: calc(var(--kb-dashboard-panel-scroll-height) / 1.9);
-  /* Sensors & trends column share; rule feed fills the rest (e.g. 65% / 72%). */
   --kb-dashboard-sensors-column-width: 70%;
 }
 
