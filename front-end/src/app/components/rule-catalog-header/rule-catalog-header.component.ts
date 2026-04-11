@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RULE_CATALOG_ENTRIES } from '../../models/rule-catalog.data';
+import { Component, inject } from '@angular/core';
+import { RuleCatalogService } from '../../services/rule-catalog.service';
 
 @Component({
   selector: 'rule-catalog-header-btn',
@@ -8,15 +8,9 @@ import { RULE_CATALOG_ENTRIES } from '../../models/rule-catalog.data';
   styleUrl: './rule-catalog-header.component.scss',
 })
 export class RuleCatalogHeaderComponent {
-  protected readonly rules = RULE_CATALOG_ENTRIES;
+  private readonly catalog = inject(RuleCatalogService);
 
-  open(dlg: HTMLDialogElement) {
-    dlg.showModal();
-  }
-
-  onBackdrop(ev: MouseEvent, dlg: HTMLDialogElement) {
-    if (ev.target === dlg) {
-      dlg.close();
-    }
+  open(): void {
+    this.catalog.open(null);
   }
 }

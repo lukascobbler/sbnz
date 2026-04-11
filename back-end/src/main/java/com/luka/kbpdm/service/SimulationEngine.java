@@ -168,14 +168,12 @@ public class SimulationEngine implements DisposableBean {
         WorkingMemoryOps.deleteFactsForMachine(session, UnsafeReason.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, SafetyResult.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, SafetyCheck.class, machineId);
-        WorkingMemoryOps.deleteFactsForMachine(session, MachineHalted.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, TickStatus.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, MetricTick.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, TelemetryReading.class, machineId);
         telemetry.removeKeysStartingWith(machineId + ":");
         tickIndexByMachine.remove(machineId);
 
-        restoreComponentStatusAfterOperatorFix(profile);
         telemetry.resetToNominal(sensors, simulatedTime, profile);
         Map<String, MachineWorkload> perMetric = workloadByMachineMetric.computeIfAbsent(machineId, k -> new LinkedHashMap<>());
         for (MetricProfile metric : profile.metrics()) {
@@ -247,7 +245,7 @@ public class SimulationEngine implements DisposableBean {
 
             WorkingMemoryOps.deleteFactsOfType(session, SafetyCheck.class);
             WorkingMemoryOps.deleteFactsOfType(session, SafetyResult.class);
-            WorkingMemoryOps.deleteFactsOfType(session, UnsafeReason.class);
+            WorkingMemoryOps.deleteTransientUnsafeReasons(session);
 
             refreshSimulatedClock();
 
@@ -344,25 +342,12 @@ public class SimulationEngine implements DisposableBean {
             session.insert(new ComponentStatus(
                     p.machineId(),
                     p.componentType(),
-                    HealthStatus.OK,
                     simulatedTime.minus(p.componentAgeAtStart()),
                     p.serviceInterval()
             ));
             telemetry.resetToNominal(sensors, simulatedTime, p);
         }
         session.insert(new SimulatedClock(simulatedTime));
-    }
-
-    private void restoreComponentStatusAfterOperatorFix(MachineProcessProfile profile) {
-        String machineId = profile.machineId();
-        WorkingMemoryOps.deleteFactsForMachine(session, ComponentStatus.class, machineId);
-        session.insert(new ComponentStatus(
-                machineId,
-                profile.componentType(),
-                HealthStatus.OK,
-                simulatedTime,
-                profile.serviceInterval()
-        ));
     }
 
     @Override

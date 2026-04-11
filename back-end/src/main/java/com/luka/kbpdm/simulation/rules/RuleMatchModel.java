@@ -57,9 +57,6 @@ public final class RuleMatchModel {
         if (o instanceof SafetyResult s) {
             return s.getMachineId();
         }
-        if (o instanceof MachineHalted h) {
-            return h.getMachineId();
-        }
         if (o instanceof MetricTick t) {
             return t.getMachineId();
         }

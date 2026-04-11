@@ -3,13 +3,10 @@ package rules;
 import com.luka.kbpdm.domain.Machine;
 import com.luka.kbpdm.domain.Intervention;
 import com.luka.kbpdm.domain.PriorityLevel;
-import com.luka.kbpdm.domain.ComponentStatus;
-import com.luka.kbpdm.domain.HealthStatus;
 import com.luka.kbpdm.domain.SafetyCheck;
 import com.luka.kbpdm.domain.SafetyResult;
 import com.luka.kbpdm.domain.UnsafeReason;
 import com.luka.kbpdm.domain.SimulatedClock;
-import com.luka.kbpdm.domain.MachineHalted;
 import com.luka.kbpdm.domain.TickStatus;
 import com.luka.kbpdm.domain.MetricTick;
 import com.luka.kbpdm.domain.CurrentMetric;
@@ -31,7 +28,7 @@ declare MetricTick
   @timestamp( ts )
 end
 
-rule "Cross-machine: Pushed line (high belt speed + LIN vibration + high pack throughput)"
+rule "Pushed conveyor line (belt speed, vibration, pack throughput)"
 salience 35
 when
   SimulatedClock( $t : now )
@@ -49,7 +46,7 @@ then
   ));
 end
 
-rule "Cross-machine: LIN instability under speed (vibration warning + rising rejects)"
+rule "Conveyor line instability (belt speed, vibration, reject rate)"
 salience 34
 when
   SimulatedClock( $t : now )
@@ -67,7 +64,7 @@ then
   ));
 end
 
-rule "Clear intervention: pushed line resolved"
+rule "Clear pushed-line intervention"
 salience 5
 when
   SimulatedClock( $t : now )
@@ -81,7 +78,7 @@ then
   delete($i);
 end
 
-rule "Clear intervention: LIN instability resolved"
+rule "Clear conveyor-instability intervention"
 salience 5
 when
   SimulatedClock( $t : now )
@@ -95,7 +92,7 @@ then
   delete($i);
 end
 
-rule "Halt: 5 consecutive ticks in critical metric stress band (OR)"
+rule "Stop machine after repeated stress on critical sensors"
 salience 12
 when
   SimulatedClock( $t : now )
@@ -105,34 +102,23 @@ when
   $t3 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 1000m] $t2 )
   $t4 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 1000m] $t3 )
   $t5 : TickStatus( machineId == $id, sustainedStressPresent == true, this after[1m, 4800m] $t1, this after[1m, 1000m] $t4 )
-  not MachineHalted( machineId == $id )
-  not Intervention( machineId == $id, priority == PriorityLevel.CRITICAL )
-  $cs : ComponentStatus( machineId == $id, health != HealthStatus.FAIL )
-then
-  insert(new MachineHalted($id));
-  modify($cs) { setHealth(HealthStatus.FAIL) };
-  insert(new Intervention(
-      $id,
-      PriorityLevel.CRITICAL,
-      "Halt: one or more critical metrics remained in stress band for 5 consecutive sub-steps (OR). Inspect machine.",
-      $t
-  ));
-end
-
-rule "Safety: halted machine is unsafe"
-salience 6
-when
-  $h : MachineHalted( $id : machineId )
   not UnsafeReason( machineId == $id, code == "OPERATOR_HALT" )
+  not Intervention( machineId == $id, priority == PriorityLevel.CRITICAL )
 then
   insert(new UnsafeReason(
       $id,
       "OPERATOR_HALT",
-      "Sustained stress band (at least one critical metric) for 5 consecutive ticks; operator fix required."
+      "The line was stopped after repeated high readings on a critical sensor. Use Fix to acknowledge and reset."
+  ));
+  insert(new Intervention(
+      $id,
+      PriorityLevel.CRITICAL,
+      "The machine stopped after critical sensors stayed in a stressed range for five checks in a row. Inspect the equipment before resuming work.",
+      $t
   ));
 end
 
-rule "Safety: unsafe result"
+rule "Safety evaluation: not safe"
 salience 3
 when
   $check : SafetyCheck( $id : machineId )
@@ -142,7 +128,7 @@ then
   insert(new SafetyResult($id, false, $reason.getCode() + ":" + $reason.getDetails(), $check.getCheckedAt()));
 end
 
-rule "Safety: safe result"
+rule "Safety evaluation: safe"
 salience 2
 when
   $check : SafetyCheck( $id : machineId )

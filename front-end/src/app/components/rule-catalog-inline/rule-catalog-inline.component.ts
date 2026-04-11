@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { RULE_CATALOG_ENTRIES } from '../../models/rule-catalog.data';
+import { Component, Input, inject } from '@angular/core';
+import { RuleCatalogService } from '../../services/rule-catalog.service';
 
 @Component({
   selector: 'rule-catalog-inline',
@@ -8,20 +8,11 @@ import { RULE_CATALOG_ENTRIES } from '../../models/rule-catalog.data';
   styleUrl: './rule-catalog-inline.component.scss',
 })
 export class RuleCatalogInlineComponent {
+  private readonly catalog = inject(RuleCatalogService);
+
   @Input() ruleName: string | null = null;
-  protected readonly rules = RULE_CATALOG_ENTRIES;
 
-  open(dlg: HTMLDialogElement) {
-    dlg.showModal();
-    setTimeout(() => {
-      const el = dlg.querySelector('.rules-list-item.rule-focused') as HTMLElement | null;
-      el?.scrollIntoView({ block: 'center' });
-    }, 0);
-  }
-
-  onBackdrop(ev: MouseEvent, dlg: HTMLDialogElement) {
-    if (ev.target === dlg) {
-      dlg.close();
-    }
+  open(): void {
+    this.catalog.open(this.ruleName);
   }
 }

@@ -1,5 +1,6 @@
 import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { ruleFeedLabel } from '../../models/rule-catalog.data';
 import { RuleFiring } from '../../models/simulation.types';
 import { machineAccentClass } from '../../utils/machine-accent';
 import { PrettyDatePipe } from '../../pipes/pretty-date.pipe';
@@ -25,6 +26,7 @@ interface TickRuleGroup {
 })
 export class RuleFeedComponent {
   protected readonly machineAccentClass = machineAccentClass;
+  protected readonly ruleLabel = ruleFeedLabel;
 
   @Input({ required: true }) rules: RuleFiring[] = [];
   @Input({ required: true }) tickEndTime: string | null = null;

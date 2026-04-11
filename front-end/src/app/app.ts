@@ -4,6 +4,7 @@ import { SimControlsComponent } from './components/sim-controls/sim-controls.com
 import { SensorsPanelComponent } from './components/sensors-panel/sensors-panel.component';
 import { RuleFeedComponent } from './components/rule-feed/rule-feed.component';
 import { ResultsPanelComponent } from './components/results-panel/results-panel.component';
+import { RuleCatalogDialogComponent } from './components/rule-catalog-dialog/rule-catalog-dialog.component';
 import { RuleCatalogHeaderComponent } from './components/rule-catalog-header/rule-catalog-header.component';
 import { MachineWorkload } from './models/simulation.types';
 import { WorkloadCyclePayload } from './components/sensors-panel/sensors-panel.component';
@@ -18,6 +19,7 @@ import { SensorHistoryService } from './services/sensor-history.service';
     RuleFeedComponent,
     ResultsPanelComponent,
     RuleCatalogHeaderComponent,
+    RuleCatalogDialogComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

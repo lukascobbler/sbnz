@@ -6,7 +6,7 @@ import com.luka.kbpdm.domain.AnomalyType;
 import com.luka.kbpdm.domain.SimulatedClock;
 dialect "java"
 
-rule "Threshold: CLM AMBIENT_C high"
+rule "Plant climate — Ambient temperature above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -18,12 +18,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "AMBIENT_C",
-      "Ambient temperature reached or exceeded the configured high band for this machine.",
+      "Ambient temperature reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: CLM HUMIDITY_PCT high"
+rule "Plant climate — Humidity above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -35,12 +35,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "HUMIDITY_PCT",
-      "Humidity reached or exceeded the configured high band for this machine.",
+      "Humidity reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: LIN VIBRATION_RMS high"
+rule "Conveyor line — Vibration above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -52,12 +52,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "VIBRATION_RMS",
-      "Vibration reached or exceeded the configured high band for this machine.",
+      "Vibration reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: CNC TEMPERATURE_C high"
+rule "CNC mill — Temperature above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -69,12 +69,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "TEMPERATURE_C",
-      "Temperature reached or exceeded the configured high band for this machine.",
+      "Temperature reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: CNC VIBRATION_RMS high"
+rule "CNC mill — Vibration above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -86,12 +86,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "VIBRATION_RMS",
-      "Vibration reached or exceeded the configured high band for this machine.",
+      "Vibration reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: CNC SPINDLE_LOAD_PCT high"
+rule "CNC mill — Spindle load above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -103,12 +103,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "SPINDLE_LOAD_PCT",
-      "Spindle load reached or exceeded the configured high band for this machine.",
+      "Spindle load reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: PKG REJECT_PCT high"
+rule "Auto packer — Reject rate above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -120,12 +120,12 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "REJECT_PCT",
-      "Reject rate reached or exceeded the configured high band for this machine.",
+      "Reject rate reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end
 
-rule "Threshold: PKG SEAL_TEMP_C high"
+rule "Auto packer — Seal temperature above high band"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -137,7 +137,7 @@ then
       $m.getMachineId(),
       AnomalyType.ABOVE_THRESHOLD,
       "SEAL_TEMP_C",
-      "Seal temperature reached or exceeded the configured high band for this machine.",
+      "Seal temperature reached or exceeded the configured high limit for this equipment.",
       $t
   ));
 end

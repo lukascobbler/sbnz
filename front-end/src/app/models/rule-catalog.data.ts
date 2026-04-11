@@ -1,53 +1,270 @@
-import { RuleCatalogEntry } from './rule-catalog.model';
+import { RuleCatalogEntry, RuleCatalogSectionId } from './rule-catalog.model';
 
-/** Threshold / CEP rules are generated from MachineProcessRegistry at backend startup; names must match DRL. */
+const L1 = 'L1' as RuleCatalogSectionId;
+const L2 = 'L2' as RuleCatalogSectionId;
+const L3 = 'L3' as RuleCatalogSectionId;
+const CEP = 'CEP' as RuleCatalogSectionId;
+
+function trendPair(
+  riseTitle: string,
+  clearTitle: string,
+  riseWhen: string,
+  clearWhen: string
+): RuleCatalogEntry[] {
+  return [
+    {
+      engineName: riseTitle,
+      section: CEP,
+      title: riseTitle,
+      description: riseWhen,
+      fromTemplate: true,
+      produces: ['Anomaly'],
+      clearCounterpart: {
+        engineName: clearTitle,
+        title: clearTitle,
+        description: clearWhen,
+        removes: ['Anomaly'],
+      },
+    },
+    {
+      engineName: clearTitle,
+      section: CEP,
+      title: clearTitle,
+      description: clearWhen,
+      fromTemplate: true,
+      catalogHidden: true,
+    },
+  ];
+}
+
 export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
-  { name: 'Threshold: CLM AMBIENT_C high', desc: 'Profile anomaly: CLM ambient temperature at or above configured high band.' },
-  { name: 'Threshold: CLM HUMIDITY_PCT high', desc: 'Profile anomaly: CLM humidity at or above configured high band.' },
-  { name: 'Threshold: LIN VIBRATION_RMS high', desc: 'Profile anomaly: LIN vibration at or above configured high band.' },
-  { name: 'Threshold: CNC TEMPERATURE_C high', desc: 'Profile anomaly: CNC temperature at or above configured high band.' },
-  { name: 'Threshold: CNC VIBRATION_RMS high', desc: 'Profile anomaly: CNC vibration at or above configured high band.' },
-  { name: 'Threshold: CNC SPINDLE_LOAD_PCT high', desc: 'Profile anomaly: CNC spindle load at or above configured high band.' },
-  { name: 'Threshold: PKG REJECT_PCT high', desc: 'Profile anomaly: PKG reject rate at or above configured high band.' },
-  { name: 'Threshold: PKG SEAL_TEMP_C high', desc: 'Profile anomaly: PKG seal temperature at or above configured high band.' },
+  {
+    engineName: 'Plant climate — Ambient temperature above high band',
+    section: L1,
+    title: 'Plant climate — Ambient temperature above high band',
+    description:
+      'Runs when the latest ambient temperature reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'Plant climate — Humidity above high band',
+    section: L1,
+    title: 'Plant climate — Humidity above high band',
+    description:
+      'Runs when the latest humidity reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'Conveyor line — Vibration above high band',
+    section: L1,
+    title: 'Conveyor line — Vibration above high band',
+    description:
+      'Runs when the latest vibration reading for the conveyor reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'CNC mill — Temperature above high band',
+    section: L1,
+    title: 'CNC mill — Temperature above high band',
+    description:
+      'Runs when the latest temperature reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'CNC mill — Vibration above high band',
+    section: L1,
+    title: 'CNC mill — Vibration above high band',
+    description:
+      'Runs when the latest vibration reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'CNC mill — Spindle load above high band',
+    section: L1,
+    title: 'CNC mill — Spindle load above high band',
+    description:
+      'Runs when the latest spindle load reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'Auto packer — Reject rate above high band',
+    section: L1,
+    title: 'Auto packer — Reject rate above high band',
+    description:
+      'Runs when the latest reject rate for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
+  {
+    engineName: 'Auto packer — Seal temperature above high band',
+    section: L1,
+    title: 'Auto packer — Seal temperature above high band',
+    description:
+      'Runs when the latest seal temperature for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    fromTemplate: true,
+    produces: ['Anomaly'],
+  },
 
-  { name: 'CEP: CLM AMBIENT_C rising trend', desc: 'Ten strictly increasing metric ticks for CLM AMBIENT_C.' },
-  { name: 'CEP: CLM AMBIENT_C rising trend cleared', desc: 'Five decreasing ticks clear CLM ambient rising-trend anomaly.' },
-  { name: 'CEP: CLM HUMIDITY_PCT rising trend', desc: 'Ten strictly increasing metric ticks for CLM HUMIDITY_PCT.' },
-  { name: 'CEP: CLM HUMIDITY_PCT rising trend cleared', desc: 'Five decreasing ticks clear CLM humidity rising-trend anomaly.' },
-  { name: 'CEP: LIN VIBRATION_RMS rising trend', desc: 'Ten strictly increasing metric ticks for LIN VIBRATION_RMS.' },
-  { name: 'CEP: LIN VIBRATION_RMS rising trend cleared', desc: 'Five decreasing ticks clear LIN vibration rising-trend anomaly.' },
-  { name: 'CEP: LIN BELT_SPEED_PCT rising trend', desc: 'Ten strictly increasing metric ticks for LIN BELT_SPEED_PCT.' },
-  { name: 'CEP: LIN BELT_SPEED_PCT rising trend cleared', desc: 'Five decreasing ticks clear LIN belt speed rising-trend anomaly.' },
-  { name: 'CEP: CNC TEMPERATURE_C rising trend', desc: 'Ten strictly increasing metric ticks for CNC TEMPERATURE_C.' },
-  { name: 'CEP: CNC TEMPERATURE_C rising trend cleared', desc: 'Five decreasing ticks clear CNC temperature rising-trend anomaly.' },
-  { name: 'CEP: CNC VIBRATION_RMS rising trend', desc: 'Ten strictly increasing metric ticks for CNC VIBRATION_RMS.' },
-  { name: 'CEP: CNC VIBRATION_RMS rising trend cleared', desc: 'Five decreasing ticks clear CNC vibration rising-trend anomaly.' },
-  { name: 'CEP: CNC SPINDLE_LOAD_PCT rising trend', desc: 'Ten strictly increasing metric ticks for CNC SPINDLE_LOAD_PCT.' },
-  { name: 'CEP: CNC SPINDLE_LOAD_PCT rising trend cleared', desc: 'Five decreasing ticks clear CNC spindle load rising-trend anomaly.' },
-  { name: 'CEP: PKG CASES_PER_MIN rising trend', desc: 'Ten strictly increasing metric ticks for PKG CASES_PER_MIN.' },
-  { name: 'CEP: PKG CASES_PER_MIN rising trend cleared', desc: 'Five decreasing ticks clear PKG throughput rising-trend anomaly.' },
-  { name: 'CEP: PKG REJECT_PCT rising trend', desc: 'Ten strictly increasing metric ticks for PKG REJECT_PCT.' },
-  { name: 'CEP: PKG REJECT_PCT rising trend cleared', desc: 'Five decreasing ticks clear PKG reject rate rising-trend anomaly.' },
-  { name: 'CEP: PKG SEAL_TEMP_C rising trend', desc: 'Ten strictly increasing metric ticks for PKG SEAL_TEMP_C.' },
-  { name: 'CEP: PKG SEAL_TEMP_C rising trend cleared', desc: 'Five decreasing ticks clear PKG seal temperature rising-trend anomaly.' },
+  {
+    engineName: 'Safety evaluation: not safe',
+    section: L2,
+    title: 'Safety evaluation: not safe',
+    description:
+      'Runs when a safety check is requested for a machine that already has an unsafe reason and no safety outcome exists yet.',
+    fromTemplate: false,
+    produces: ['Safety result'],
+  },
+  {
+    engineName: 'Safety evaluation: safe',
+    section: L2,
+    title: 'Safety evaluation: safe',
+    description:
+      'Runs when a safety check is requested, no unsafe reason is present, and no safety outcome exists yet.',
+    fromTemplate: false,
+    produces: ['Safety result'],
+  },
 
   {
-    name: 'Cross-machine: Shared environment (humidity + CNC thermal stress)',
-    desc: 'Same simulation sub-step: CLM humidity ≥ profile high band and CNC temperature in stress band → MEDIUM intervention on CNC.',
+    engineName: 'Pushed conveyor line (belt speed, vibration, pack throughput)',
+    section: L3,
+    title: 'Pushed conveyor line (belt speed, vibration, pack throughput)',
+    description:
+      'Runs when belt speed, conveyor vibration, and pack throughput are all in their raised bands at the same time, and the matching high-priority recommendation is not already active.',
+    fromTemplate: false,
+    produces: ['Intervention'],
+    clearCounterpart: {
+      engineName: 'Clear pushed-line intervention',
+      title: 'Clear pushed-line intervention',
+      description:
+        'Runs once simulated time has moved past the moment the pushed-line intervention was created, and belt speed, vibration, and pack throughput are no longer all in their raised band together.',
+      removes: ['Intervention'],
+    },
   },
   {
-    name: 'Cross-machine: Upstream coupling (slow belt + low pack throughput)',
-    desc: 'Same simulation sub-step: LIN belt speed ≤ 84% and PKG throughput ≤ 98 cases/min → HIGH (non-critical) intervention on PKG.',
+    engineName: 'Clear pushed-line intervention',
+    section: L2,
+    title: 'Clear pushed-line intervention',
+    description:
+      'Runs once simulated time has moved past the moment the pushed-line intervention was created, and belt speed, vibration, and pack throughput are no longer all in their raised band together.',
+    fromTemplate: false,
+    catalogHidden: true,
+  },
+
+  {
+    engineName: 'Conveyor line instability (belt speed, vibration, reject rate)',
+    section: L3,
+    title: 'Conveyor line instability (belt speed, vibration, reject rate)',
+    description:
+      'Runs when belt speed and conveyor vibration are raised while reject rate is up, and the matching medium-priority recommendation is not already active.',
+    fromTemplate: false,
+    produces: ['Intervention'],
+    clearCounterpart: {
+      engineName: 'Clear conveyor-instability intervention',
+      title: 'Clear conveyor-instability intervention',
+      description:
+        'Runs once simulated time has moved past the moment the conveyor-instability intervention was created, and the combination of raised belt speed, raised vibration, and raised reject rate no longer all holds.',
+      removes: ['Intervention'],
+    },
   },
   {
-    name: 'Halt: 5 consecutive ticks in critical metric stress band (OR)',
-    desc: 'Machine halts after five consecutive ticks with sustained stress; stress uses profile metrics that define a stress threshold (OR).',
+    engineName: 'Clear conveyor-instability intervention',
+    section: L2,
+    title: 'Clear conveyor-instability intervention',
+    description:
+      'Runs once simulated time has moved past the moment the conveyor-instability intervention was created, and the combination of raised belt speed, raised vibration, and raised reject rate no longer all holds.',
+    fromTemplate: false,
+    catalogHidden: true,
   },
+
   {
-    name: 'Safety: halted machine is unsafe',
-    desc: 'If MachineHalted exists and OPERATOR_HALT UnsafeReason is missing, insert UnsafeReason.',
+    engineName: 'Stop machine after repeated stress on critical sensors',
+    section: CEP,
+    title: 'Stop machine after repeated stress on critical sensors',
+    description:
+      'Runs when this machine does not yet have an operator-halt unsafe reason, no critical halt recommendation exists for it yet, and its stress indicator stayed true across five consecutive linked checks on the timeline for any of its critical sensors.',
+    fromTemplate: false,
+    produces: ['Unsafe reason', 'Intervention'],
   },
-  { name: 'Safety: unsafe result', desc: 'SafetyCheck plus any UnsafeReason yields UNSAFE SafetyResult.' },
-  { name: 'Safety: safe result', desc: 'SafetyCheck with no UnsafeReason yields SAFE SafetyResult.' },
+
+  ...trendPair(
+    'Conveyor line — Vibration rising over 10 steps',
+    'Conveyor line — Vibration rising trend ended',
+    'Runs when the ten most recent vibration samples on the conveyor each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a conveyor vibration rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'Conveyor line — Belt speed rising over 10 steps',
+    'Conveyor line — Belt speed rising trend ended',
+    'Runs when the ten most recent belt speed samples on the conveyor each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a conveyor belt-speed rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'CNC mill — Temperature rising over 10 steps',
+    'CNC mill — Temperature rising trend ended',
+    'Runs when the ten most recent temperature samples on the CNC mill each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a CNC temperature rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'CNC mill — Vibration rising over 10 steps',
+    'CNC mill — Vibration rising trend ended',
+    'Runs when the ten most recent vibration samples on the CNC mill each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a CNC vibration rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'CNC mill — Spindle load rising over 10 steps',
+    'CNC mill — Spindle load rising trend ended',
+    'Runs when the ten most recent spindle load samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a CNC spindle-load rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'Auto packer — Throughput rising over 10 steps',
+    'Auto packer — Throughput rising trend ended',
+    'Runs when the ten most recent throughput samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a throughput rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'Auto packer — Reject rate rising over 10 steps',
+    'Auto packer — Reject rate rising trend ended',
+    'Runs when the ten most recent reject rate samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a reject-rate rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
+  ...trendPair(
+    'Auto packer — Seal temperature rising over 10 steps',
+    'Auto packer — Seal temperature rising trend ended',
+    'Runs when the ten most recent seal temperature samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
+    'Runs when a seal-temperature rising-trend anomaly is open and the last five samples each read lower than the previous.'
+  ),
 ];
+
+const byEngineName = new Map<string, RuleCatalogEntry>(RULE_CATALOG_ENTRIES.map((r) => [r.engineName, r]));
+
+/** Clearing-rule engine name → primary card engine name (for focus / expand). */
+const primaryEngineByClearEngine = new Map<string, string>();
+for (const r of RULE_CATALOG_ENTRIES) {
+  if (r.clearCounterpart) {
+    primaryEngineByClearEngine.set(r.clearCounterpart.engineName, r.engineName);
+  }
+}
+
+export function ruleCatalogEntry(engineName: string): RuleCatalogEntry | undefined {
+  return byEngineName.get(engineName);
+}
+
+/** If this engine name is a hidden clear rule, returns the primary card to show and highlight. */
+export function primaryEngineForClearRule(engineName: string): string | undefined {
+  return primaryEngineByClearEngine.get(engineName);
+}
+
+export function ruleFeedLabel(engineName: string): string {
+  return ruleCatalogEntry(engineName)?.title ?? engineName;
+}
+
+export function rulesInSection(section: RuleCatalogSectionId): RuleCatalogEntry[] {
+  return RULE_CATALOG_ENTRIES.filter((r) => r.section === section && !r.catalogHidden);
+}

@@ -95,7 +95,7 @@
     <aside class="panel-side">
       <info-dialog-btn
         title="Safety"
-        body="UNSAFE when a machine is halted: halt fires after 5 consecutive sub-steps where at least one profile-marked critical metric stays in its stress band. The rule inserts CRITICAL intervention, sets component HealthStatus.FAIL, and stops telemetry. Only the Fix button clears halt and diagnoses; simulated repairs do not."
+        body="UNSAFE when the stress-halt path has run: after five consecutive stressed checks on critical metrics, one rule inserts an operator-halt unsafe reason and a CRITICAL intervention, and telemetry stops for that machine. Only the Fix button clears those facts; simulated repairs do not."
       />
     </aside>
     <div class="panel-content">

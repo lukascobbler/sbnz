@@ -2,7 +2,7 @@
   <aside class="panel-side">
     <info-dialog-btn
       title="Sensors & trends"
-      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). Controls are profile-driven: each machine can expose any number of workload-enabled metrics, and each metric cycles Normal → Overworked → Rest independently. Halt rules use profile-defined stress bands for critical metrics and trigger after 5 consecutive stressed sub-steps."
+      body="Latest reading per metric plus a trend chart (browser only, last ~80 samples). Controls are profile-driven: each machine can expose any number of workload-enabled metrics, and each metric cycles Normal → Overworked → Rest independently. When stress rules trip, an operator-halt unsafe reason is recorded, telemetry stops for that machine, and Fix clears it."
     />
   </aside>
   <div class="panel-content">

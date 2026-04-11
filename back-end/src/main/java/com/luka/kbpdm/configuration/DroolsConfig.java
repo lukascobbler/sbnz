@@ -75,8 +75,8 @@ public class DroolsConfig {
                 if (!metric.hasAnomalyThreshold()) {
                     continue;
                 }
-                String ruleName = "Threshold: " + machine.machineId() + " " + metric.metricKey() + " high";
-                String desc = metric.displayName() + " reached or exceeded the configured high band for this machine.";
+                String ruleName = machine.displayName() + " — " + metric.displayName() + " above high band";
+                String desc = metric.displayName() + " reached or exceeded the configured high limit for this equipment.";
                 rows.add(new String[]{
                         ruleName,
                         machine.machineId(),
@@ -97,13 +97,16 @@ public class DroolsConfig {
                 if (!metric.trendEnabled()) {
                     continue;
                 }
-                String metricName = metric.displayName() + " (" + metric.metricKey() + ")";
+                String riseRuleName = machine.displayName() + " — " + metric.displayName() + " rising over 10 steps";
+                String clearRuleName = machine.displayName() + " — " + metric.displayName() + " rising trend ended";
+                String riseDesc = metric.displayName() + " on " + machine.displayName()
+                        + " increased for 10 evaluations in a row, each higher than the previous.";
                 rows.add(new String[]{
-                        "CEP: " + machine.machineId() + " " + metric.metricKey() + " rising trend",
-                        "CEP: " + machine.machineId() + " " + metric.metricKey() + " rising trend cleared",
+                        riseRuleName,
+                        clearRuleName,
                         machine.machineId(),
                         metric.metricKey(),
-                        metricName + " rose 10 consecutive ticks (strictly increasing each sub-step)."
+                        riseDesc
                 });
             }
         }

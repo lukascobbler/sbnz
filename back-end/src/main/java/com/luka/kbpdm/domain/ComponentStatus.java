@@ -13,7 +13,6 @@ import java.time.Instant;
 public class ComponentStatus {
     private String machineId;
     private ComponentType component;
-    private HealthStatus health;
 
     private Instant lastServicedAt;
     private Duration serviceInterval;

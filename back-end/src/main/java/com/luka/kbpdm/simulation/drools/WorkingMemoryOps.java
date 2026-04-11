@@ -19,11 +19,14 @@ public final class WorkingMemoryOps {
         return out;
     }
 
+    /** Machines in an operator-halt state (stress halt inserts {@code UnsafeReason} with this code). */
+    public static final String OPERATOR_HALT_CODE = "OPERATOR_HALT";
+
     public static Set<String> haltedMachineIds(KieSession session) {
         Set<String> set = new HashSet<>();
-        for (MachineHalted h : getFacts(session, MachineHalted.class)) {
-            if (h.getMachineId() != null) {
-                set.add(h.getMachineId());
+        for (UnsafeReason u : getFacts(session, UnsafeReason.class)) {
+            if (u.getMachineId() != null && OPERATOR_HALT_CODE.equals(u.getCode())) {
+                set.add(u.getMachineId());
             }
         }
         return set;
@@ -35,6 +38,23 @@ public final class WorkingMemoryOps {
             copy.add(o);
         }
         for (Object o : copy) {
+            FactHandle fh = session.getFactHandle(o);
+            if (fh != null) {
+                session.delete(fh);
+            }
+        }
+    }
+
+    /**
+     * Removes {@link UnsafeReason} facts that are re-derived each evaluation step. Preserves
+     * {@value #OPERATOR_HALT_CODE}, which must survive across ticks (same role the former {@code MachineHalted} fact had).
+     */
+    public static void deleteTransientUnsafeReasons(KieSession session) {
+        for (Object o : new ArrayList<>(session.getObjects(new ClassObjectFilter(UnsafeReason.class)))) {
+            UnsafeReason u = (UnsafeReason) o;
+            if (OPERATOR_HALT_CODE.equals(u.getCode())) {
+                continue;
+            }
             FactHandle fh = session.getFactHandle(o);
             if (fh != null) {
                 session.delete(fh);
@@ -80,9 +100,6 @@ public final class WorkingMemoryOps {
         }
         if (o instanceof SafetyCheck s) {
             return s.getMachineId();
-        }
-        if (o instanceof MachineHalted h) {
-            return h.getMachineId();
         }
         return null;
     }

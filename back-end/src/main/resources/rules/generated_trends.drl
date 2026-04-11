@@ -6,7 +6,7 @@ import com.luka.kbpdm.domain.SimulatedClock;
 import java.lang.Number;
 dialect "java"
 
-rule "CEP: CLM AMBIENT_C rising trend"
+rule "Plant climate — Ambient temperature rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -31,11 +31,11 @@ then
       "CLM",
       AnomalyType.RISING_TREND,
       "AMBIENT_C",
-      "Ambient temperature (AMBIENT_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Ambient temperature on Plant climate increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: CLM AMBIENT_C rising trend cleared"
+rule "Plant climate — Ambient temperature rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "AMBIENT_C" )
@@ -53,7 +53,7 @@ then
   delete( $a );
 end
 
-rule "CEP: CLM HUMIDITY_PCT rising trend"
+rule "Plant climate — Humidity rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -78,11 +78,11 @@ then
       "CLM",
       AnomalyType.RISING_TREND,
       "HUMIDITY_PCT",
-      "Humidity (HUMIDITY_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Humidity on Plant climate increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: CLM HUMIDITY_PCT rising trend cleared"
+rule "Plant climate — Humidity rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "CLM", type == AnomalyType.RISING_TREND, metricKey == "HUMIDITY_PCT" )
@@ -100,7 +100,7 @@ then
   delete( $a );
 end
 
-rule "CEP: LIN VIBRATION_RMS rising trend"
+rule "Conveyor line — Vibration rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -125,11 +125,11 @@ then
       "LIN",
       AnomalyType.RISING_TREND,
       "VIBRATION_RMS",
-      "Vibration (VIBRATION_RMS) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Vibration on Conveyor line increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: LIN VIBRATION_RMS rising trend cleared"
+rule "Conveyor line — Vibration rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "VIBRATION_RMS" )
@@ -147,7 +147,7 @@ then
   delete( $a );
 end
 
-rule "CEP: LIN BELT_SPEED_PCT rising trend"
+rule "Conveyor line — Belt speed rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -172,11 +172,11 @@ then
       "LIN",
       AnomalyType.RISING_TREND,
       "BELT_SPEED_PCT",
-      "Belt speed (BELT_SPEED_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Belt speed on Conveyor line increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: LIN BELT_SPEED_PCT rising trend cleared"
+rule "Conveyor line — Belt speed rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "LIN", type == AnomalyType.RISING_TREND, metricKey == "BELT_SPEED_PCT" )
@@ -194,7 +194,7 @@ then
   delete( $a );
 end
 
-rule "CEP: CNC TEMPERATURE_C rising trend"
+rule "CNC mill — Temperature rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -219,11 +219,11 @@ then
       "CNC",
       AnomalyType.RISING_TREND,
       "TEMPERATURE_C",
-      "Temperature (TEMPERATURE_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Temperature on CNC mill increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: CNC TEMPERATURE_C rising trend cleared"
+rule "CNC mill — Temperature rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "CNC", type == AnomalyType.RISING_TREND, metricKey == "TEMPERATURE_C" )
@@ -241,7 +241,7 @@ then
   delete( $a );
 end
 
-rule "CEP: CNC VIBRATION_RMS rising trend"
+rule "CNC mill — Vibration rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -266,11 +266,11 @@ then
       "CNC",
       AnomalyType.RISING_TREND,
       "VIBRATION_RMS",
-      "Vibration (VIBRATION_RMS) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Vibration on CNC mill increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: CNC VIBRATION_RMS rising trend cleared"
+rule "CNC mill — Vibration rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "CNC", type == AnomalyType.RISING_TREND, metricKey == "VIBRATION_RMS" )
@@ -288,7 +288,7 @@ then
   delete( $a );
 end
 
-rule "CEP: CNC SPINDLE_LOAD_PCT rising trend"
+rule "CNC mill — Spindle load rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -313,11 +313,11 @@ then
       "CNC",
       AnomalyType.RISING_TREND,
       "SPINDLE_LOAD_PCT",
-      "Spindle load (SPINDLE_LOAD_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Spindle load on CNC mill increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: CNC SPINDLE_LOAD_PCT rising trend cleared"
+rule "CNC mill — Spindle load rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "CNC", type == AnomalyType.RISING_TREND, metricKey == "SPINDLE_LOAD_PCT" )
@@ -335,7 +335,7 @@ then
   delete( $a );
 end
 
-rule "CEP: PKG CASES_PER_MIN rising trend"
+rule "Auto packer — Throughput rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -360,11 +360,11 @@ then
       "PKG",
       AnomalyType.RISING_TREND,
       "CASES_PER_MIN",
-      "Throughput (CASES_PER_MIN) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Throughput on Auto packer increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: PKG CASES_PER_MIN rising trend cleared"
+rule "Auto packer — Throughput rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "CASES_PER_MIN" )
@@ -382,7 +382,7 @@ then
   delete( $a );
 end
 
-rule "CEP: PKG REJECT_PCT rising trend"
+rule "Auto packer — Reject rate rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -407,11 +407,11 @@ then
       "PKG",
       AnomalyType.RISING_TREND,
       "REJECT_PCT",
-      "Reject rate (REJECT_PCT) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Reject rate on Auto packer increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: PKG REJECT_PCT rising trend cleared"
+rule "Auto packer — Reject rate rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "REJECT_PCT" )
@@ -429,7 +429,7 @@ then
   delete( $a );
 end
 
-rule "CEP: PKG SEAL_TEMP_C rising trend"
+rule "Auto packer — Seal temperature rising over 10 steps"
 salience 15
 when
   SimulatedClock( $t : now )
@@ -454,11 +454,11 @@ then
       "PKG",
       AnomalyType.RISING_TREND,
       "SEAL_TEMP_C",
-      "Seal temperature (SEAL_TEMP_C) rose 10 consecutive ticks (strictly increasing each sub-step).",
+      "Seal temperature on Auto packer increased for 10 evaluations in a row, each higher than the previous.",
       $t
   ));
 end
-rule "CEP: PKG SEAL_TEMP_C rising trend cleared"
+rule "Auto packer — Seal temperature rising trend ended"
 salience 16
 when
   $a : Anomaly( machineId == "PKG", type == AnomalyType.RISING_TREND, metricKey == "SEAL_TEMP_C" )
