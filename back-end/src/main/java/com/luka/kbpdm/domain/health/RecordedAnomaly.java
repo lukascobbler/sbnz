@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.health;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -7,15 +7,15 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+/** Append-only audit fact (not removed by operator Fix). */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Anomaly {
+public class RecordedAnomaly {
     private String machineId;
-    private AnomalyType type;
-    private String metricKey;
+    private String typeName;
     private String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant detectedAt;
+    private Instant recordedAt;
 }

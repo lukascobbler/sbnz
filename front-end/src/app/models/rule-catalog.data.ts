@@ -4,6 +4,7 @@ const L1 = 'L1' as RuleCatalogSectionId;
 const L2 = 'L2' as RuleCatalogSectionId;
 const L3 = 'L3' as RuleCatalogSectionId;
 const CEP = 'CEP' as RuleCatalogSectionId;
+const QUERY = 'QUERY' as RuleCatalogSectionId;
 
 function trendPair(
   riseTitle: string,
@@ -240,6 +241,15 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     'Runs when the ten most recent seal temperature samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
     'Runs when a seal-temperature rising-trend anomaly is open and the last five samples each read lower than the previous.'
   ),
+
+  {
+    engineName: 'MachineHealth',
+    section: QUERY,
+    title: 'Machine health',
+    description:
+      'Answers “how healthy is this machine right now?” for the one you picked. It looks at what has already been logged for that machine—issues spotted, steps taken, times it had to stop for safety, and times an operator cleared a problem—and turns that into a single score from 0 to 100. Nothing new is written to the log when you ask; it only reads what is already there.',
+    fromTemplate: false,
+  },
 ];
 
 const byEngineName = new Map<string, RuleCatalogEntry>(RULE_CATALOG_ENTRIES.map((r) => [r.engineName, r]));

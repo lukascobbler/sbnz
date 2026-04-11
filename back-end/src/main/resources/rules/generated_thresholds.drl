@@ -1,9 +1,9 @@
 package rules;
-import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.domain.Anomaly;
-import com.luka.kbpdm.domain.AnomalyType;
-import com.luka.kbpdm.domain.SimulatedClock;
+import com.luka.kbpdm.domain.machine.Machine;
+import com.luka.kbpdm.domain.telemetry.TelemetryReading;
+import com.luka.kbpdm.domain.diagnosis.Anomaly;
+import com.luka.kbpdm.domain.diagnosis.AnomalyType;
+import com.luka.kbpdm.domain.telemetry.SimulatedClock;
 dialect "java"
 
 rule "Plant climate — Ambient temperature above high band"
@@ -45,7 +45,7 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "LIN" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 4.4 )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 3.85 )
   not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "VIBRATION_RMS" )
 then
   insert(new Anomaly(
@@ -62,7 +62,7 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "CNC" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "TEMPERATURE_C", value >= 78.0 )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "TEMPERATURE_C", value >= 67.5 )
   not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "TEMPERATURE_C" )
 then
   insert(new Anomaly(
@@ -79,7 +79,7 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "CNC" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 5.9 )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 5.35 )
   not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "VIBRATION_RMS" )
 then
   insert(new Anomaly(
@@ -96,7 +96,7 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "CNC" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "SPINDLE_LOAD_PCT", value >= 93.0 )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "SPINDLE_LOAD_PCT", value >= 84.0 )
   not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SPINDLE_LOAD_PCT" )
 then
   insert(new Anomaly(
@@ -130,7 +130,7 @@ salience 50
 when
   SimulatedClock( $t : now )
   $m : Machine( machineId == "PKG" )
-  $r : TelemetryReading( machineId == $m.machineId, metric == "SEAL_TEMP_C", value >= 105.0 )
+  $r : TelemetryReading( machineId == $m.machineId, metric == "SEAL_TEMP_C", value >= 99.0 )
   not Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SEAL_TEMP_C" )
 then
   insert(new Anomaly(

@@ -23,14 +23,15 @@ public record MetricProfile(
         if (decimals < 0 || decimals > 8) {
             throw new IllegalArgumentException("decimals out of range: " + decimals);
         }
-        if (anomalyThreshold != null && stressThreshold != null && anomalyThreshold <= stressThreshold) {
-            throw new IllegalArgumentException(metricKey + ": anomaly threshold must be > stress threshold");
+        double normalHi = nominal * TELEMETRY_NORMAL_DRIFT_HIGH_MULT;
+        if (anomalyThreshold != null && anomalyThreshold <= normalHi) {
+            throw new IllegalArgumentException(metricKey + ": anomaly threshold must exceed NORMAL upper envelope");
         }
-        if (stressThreshold != null) {
-            double normalHi = nominal * TELEMETRY_NORMAL_DRIFT_HIGH_MULT;
-            if (stressThreshold <= normalHi) {
-                throw new IllegalArgumentException(metricKey + ": stress threshold must exceed NORMAL upper envelope");
-            }
+        if (stressThreshold != null && stressThreshold <= normalHi) {
+            throw new IllegalArgumentException(metricKey + ": stress threshold must exceed NORMAL upper envelope");
+        }
+        if (anomalyThreshold != null && stressThreshold != null && anomalyThreshold >= stressThreshold) {
+            throw new IllegalArgumentException(metricKey + ": anomaly threshold must be < stress threshold (warning before stress)");
         }
     }
 
@@ -43,11 +44,14 @@ public record MetricProfile(
     }
 
     public double thresholdHintForGenerator() {
-        if (anomalyThreshold != null) {
-            return anomalyThreshold;
+        if (anomalyThreshold != null && stressThreshold != null) {
+            return Math.max(anomalyThreshold, stressThreshold);
         }
         if (stressThreshold != null) {
             return stressThreshold;
+        }
+        if (anomalyThreshold != null) {
+            return anomalyThreshold;
         }
         return nominal * 1.35;
     }

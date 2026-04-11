@@ -1,7 +1,7 @@
 package com.luka.kbpdm.simulation.machines;
 
-import com.luka.kbpdm.domain.ComponentType;
-import com.luka.kbpdm.domain.MachineType;
+import com.luka.kbpdm.domain.machine.ComponentType;
+import com.luka.kbpdm.domain.machine.MachineType;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;

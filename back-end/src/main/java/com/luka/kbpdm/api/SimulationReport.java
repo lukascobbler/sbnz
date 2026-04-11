@@ -1,7 +1,13 @@
 package com.luka.kbpdm.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.luka.kbpdm.domain.*;
+import com.luka.kbpdm.domain.diagnosis.Anomaly;
+import com.luka.kbpdm.domain.diagnosis.Intervention;
+import com.luka.kbpdm.domain.machine.ComponentStatus;
+import com.luka.kbpdm.domain.machine.Machine;
+import com.luka.kbpdm.domain.safety.SafetyResult;
+import com.luka.kbpdm.domain.safety.UnsafeReason;
+import com.luka.kbpdm.domain.telemetry.TelemetryReading;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

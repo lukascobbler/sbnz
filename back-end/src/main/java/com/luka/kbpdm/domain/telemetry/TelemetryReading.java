@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.telemetry;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UnsafeReason {
+public class TelemetryReading {
     private String machineId;
-    private String code;
-    private String details;
+    private String metric;
+    private double value;
+    private long ts;
 }
-

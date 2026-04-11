@@ -2,7 +2,7 @@ package com.luka.kbpdm.simulation.telemetry;
 
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SensorStatus;
-import com.luka.kbpdm.domain.TelemetryReading;
+import com.luka.kbpdm.domain.telemetry.TelemetryReading;
 import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.kie.api.runtime.KieSession;

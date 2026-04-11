@@ -54,6 +54,19 @@ export interface MachineProfileView {
   metrics: MetricProfileView[];
 }
 
+export interface MachineHealthReport {
+  machineId: string;
+  healthPercent: number;
+  anomalyCount: number;
+  interventionCount: number;
+  unsafeReasonCount: number;
+  fixCount: number;
+  anomalyHistory: { type: string; description: string; at: string }[];
+  interventionHistory: { priority: string; recommendation: string; at: string }[];
+  unsafeReasonHistory: { code: string; details: string; at: string }[];
+  fixHistory: { at: string }[];
+}
+
 export interface SimulationReport {
   simulatedTime: string;
   tickMinutes: number;

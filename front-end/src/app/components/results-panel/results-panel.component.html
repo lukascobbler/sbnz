@@ -1,10 +1,11 @@
 <div class="results-stack">
+  <machine-health-dialog #healthDlg />
   <div class="grid results-two">
     <section class="card panel-with-info">
       <aside class="panel-side">
         <info-dialog-btn
           title="Anomalies"
-          body="Facts in Drools working memory (from rules), sorted by detected time. Timestamps use the simulated clock fact so they align with pseudo-time."
+          body="A live list of things the system has flagged as unusual: readings that crossed a limit, odd trends, and similar. Each row is one finding, with the time it was noticed. Times follow the simulation clock so they match the timeline you are stepping through."
         />
       </aside>
       <div class="panel-content">
@@ -48,7 +49,7 @@
       <aside class="panel-side">
         <info-dialog-btn
           title="Interventions"
-          body="Working-memory interventions derived from anomalies (L3 rules), sorted by decided time."
+          body="When several signals together suggest a deeper issue, the system can add a recommended action here, with a priority so you see what matters most. Rows are sorted by when that recommendation was created."
         />
       </aside>
       <div class="panel-content">
@@ -95,7 +96,7 @@
     <aside class="panel-side">
       <info-dialog-btn
         title="Safety"
-        body="UNSAFE when the stress-halt path has run: after five consecutive stressed checks on critical metrics, one rule inserts an operator-halt unsafe reason and a CRITICAL intervention, and telemetry stops for that machine. Only the Fix button clears those facts; simulated repairs do not."
+        body="Shows whether each machine is treated as safe to keep running or needs operator attention. If readings stay in a bad zone for too long on important sensors, the line can flip to unsafe and the machine can stop updating until a fix is applied."
       />
     </aside>
     <div class="panel-content">
@@ -113,6 +114,7 @@
           <div class="th">Machine</div>
           <div class="th">Status</div>
           <div class="th wide">Reason</div>
+          <div class="th narrow">Health</div>
           <div class="th narrow">Fix</div>
         </div>
         <div class="table-body dashboard-scroll-body scroll-pad">
@@ -133,6 +135,16 @@
                 </span>
               </div>
               <div class="td small wide">{{ s.reason }}</div>
+              <div class="td narrow">
+                <button
+                  type="button"
+                  class="btn secondary btn-compact"
+                  [disabled]="controlsBusy"
+                  (click)="healthDlg.openFor(s.machineId)"
+                >
+                  Health
+                </button>
+              </div>
               <div class="td narrow">
                 <button
                   type="button"

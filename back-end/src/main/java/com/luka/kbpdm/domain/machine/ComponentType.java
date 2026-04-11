@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.machine;
 
 public enum ComponentType {
     BEARING,
@@ -7,4 +7,3 @@ public enum ComponentType {
     ENV_SENSOR,
     SEALING
 }
-

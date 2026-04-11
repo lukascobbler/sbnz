@@ -1,7 +1,12 @@
 package com.luka.kbpdm.simulation.report;
 
 import com.luka.kbpdm.api.*;
-import com.luka.kbpdm.domain.*;
+import com.luka.kbpdm.domain.diagnosis.Anomaly;
+import com.luka.kbpdm.domain.diagnosis.Intervention;
+import com.luka.kbpdm.domain.machine.ComponentStatus;
+import com.luka.kbpdm.domain.machine.Machine;
+import com.luka.kbpdm.domain.safety.SafetyResult;
+import com.luka.kbpdm.domain.safety.UnsafeReason;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
 import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import com.luka.kbpdm.simulation.machines.MetricProfile;

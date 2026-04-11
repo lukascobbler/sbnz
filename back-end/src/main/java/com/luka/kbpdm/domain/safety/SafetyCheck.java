@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.safety;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,11 +10,8 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComponentStatus {
+public class SafetyCheck {
     private String machineId;
-    private ComponentType component;
-
-    private Instant lastServicedAt;
-    private Duration serviceInterval;
+    private Duration horizon;
+    private Instant checkedAt;
 }
-

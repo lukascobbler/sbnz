@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.safety;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -18,4 +18,3 @@ public class SafetyResult {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant evaluatedAt;
 }
-

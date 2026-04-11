@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.luka.kbpdm.domain.ComponentType.BEARING;
-import static com.luka.kbpdm.domain.ComponentType.ENV_SENSOR;
-import static com.luka.kbpdm.domain.ComponentType.MOTOR;
-import static com.luka.kbpdm.domain.ComponentType.SEALING;
-import static com.luka.kbpdm.domain.MachineType.CNC;
-import static com.luka.kbpdm.domain.MachineType.CLIMATE;
-import static com.luka.kbpdm.domain.MachineType.CONVEYOR;
-import static com.luka.kbpdm.domain.MachineType.PACK_LINE;
+import static com.luka.kbpdm.domain.machine.ComponentType.BEARING;
+import static com.luka.kbpdm.domain.machine.ComponentType.ENV_SENSOR;
+import static com.luka.kbpdm.domain.machine.ComponentType.MOTOR;
+import static com.luka.kbpdm.domain.machine.ComponentType.SEALING;
+import static com.luka.kbpdm.domain.machine.MachineType.CNC;
+import static com.luka.kbpdm.domain.machine.MachineType.CLIMATE;
+import static com.luka.kbpdm.domain.machine.MachineType.CONVEYOR;
+import static com.luka.kbpdm.domain.machine.MachineType.PACK_LINE;
 
 @Component
 public final class MachineProcessRegistry {
@@ -59,7 +59,7 @@ public final class MachineProcessRegistry {
                 Duration.ofDays(30),
                 Duration.ofDays(25),
                 List.of(
-                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 4.4, 3.85, true, true),
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 3.85, 4.4, true, true),
                         new MetricProfile("BELT_SPEED_PCT", "Belt speed", "%", 1, 95.0, 0.95, null, null, true, true)
                 )
         );
@@ -75,9 +75,9 @@ public final class MachineProcessRegistry {
                 Duration.ofDays(90),
                 Duration.ofDays(10),
                 List.of(
-                        new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 59.0, 0.28, 78.0, 67.5, true, true),
-                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.9, 5.35, true, true),
-                        new MetricProfile("SPINDLE_LOAD_PCT", "Spindle load", "%", 1, 72.0, 1.05, 93.0, 84.0, true, true)
+                        new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 59.0, 0.28, 67.5, 78.0, true, true),
+                        new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.35, 5.9, true, true),
+                        new MetricProfile("SPINDLE_LOAD_PCT", "Spindle load", "%", 1, 72.0, 1.05, 84.0, 93.0, true, true)
                 )
         );
     }
@@ -94,7 +94,7 @@ public final class MachineProcessRegistry {
                 List.of(
                         new MetricProfile("CASES_PER_MIN", "Throughput", "cases/min", 1, 118.0, 2.4, null, null, true, true),
                         new MetricProfile("REJECT_PCT", "Reject rate", "%", 2, 1.8, 0.1, 4.5, null, true, true),
-                        new MetricProfile("SEAL_TEMP_C", "Seal temperature", "C", 1, 88.0, 0.32, 105.0, 99.0, true, true)
+                        new MetricProfile("SEAL_TEMP_C", "Seal temperature", "C", 1, 88.0, 0.32, 99.0, 105.0, true, true)
                 )
         );
     }

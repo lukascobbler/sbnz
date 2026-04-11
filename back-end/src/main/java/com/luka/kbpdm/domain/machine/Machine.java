@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.machine;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetricTick {
+public class Machine {
     private String machineId;
-    private String metricKey;
-    private double value;
-    private long tickIndex;
-    private long ts;
+    private String name;
+    private MachineType type;
 }

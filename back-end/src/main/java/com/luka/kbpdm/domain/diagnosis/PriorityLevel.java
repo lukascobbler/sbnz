@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.diagnosis;
 
 public enum PriorityLevel {
     LOW,
@@ -6,4 +6,3 @@ public enum PriorityLevel {
     HIGH,
     CRITICAL
 }
-

@@ -1,10 +1,15 @@
 package com.luka.kbpdm.service;
 
+import com.luka.kbpdm.api.MachineHealthReport;
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.RuleFiring;
 import com.luka.kbpdm.api.SensorStatus;
 import com.luka.kbpdm.api.SimulationReport;
-import com.luka.kbpdm.domain.*;
+import com.luka.kbpdm.domain.diagnosis.*;
+import com.luka.kbpdm.domain.health.*;
+import com.luka.kbpdm.domain.machine.*;
+import com.luka.kbpdm.domain.safety.*;
+import com.luka.kbpdm.domain.telemetry.*;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
 import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import com.luka.kbpdm.simulation.report.SimulationSnapshotBuilder;
@@ -14,8 +19,12 @@ import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import lombok.Getter;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
+import org.kie.api.event.rule.DefaultRuleRuntimeEventListener;
+import org.kie.api.event.rule.ObjectInsertedEvent;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.QueryResults;
+import org.kie.api.runtime.rule.QueryResultsRow;
 import org.kie.api.time.SessionPseudoClock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,6 +113,31 @@ public class SimulationEngine implements DisposableBean {
             }
         });
 
+        session.addEventListener(new DefaultRuleRuntimeEventListener() {
+            @Override
+            public void objectInserted(ObjectInsertedEvent e) {
+                Object o = e.getObject();
+                if (o instanceof RecordedAnomaly
+                        || o instanceof RecordedIntervention
+                        || o instanceof RecordedUnsafeReason
+                        || o instanceof RecordedFix) {
+                    return;
+                }
+                if (o instanceof Anomaly a) {
+                    String typeStr = a.getType() == null ? "" : a.getType().name();
+                    Instant at = a.getDetectedAt() != null ? a.getDetectedAt() : simulatedTime;
+                    session.insert(new RecordedAnomaly(a.getMachineId(), typeStr, a.getDescription(), at));
+                } else if (o instanceof Intervention i) {
+                    String pri = i.getPriority() == null ? "" : i.getPriority().name();
+                    Instant at = i.getDecidedAt() != null ? i.getDecidedAt() : simulatedTime;
+                    session.insert(new RecordedIntervention(i.getMachineId(), pri, i.getRecommendation(), at));
+                } else if (o instanceof UnsafeReason u) {
+                    session.insert(new RecordedUnsafeReason(
+                            u.getMachineId(), u.getCode(), u.getDetails(), simulatedTime));
+                }
+            }
+        });
+
         seedFacts();
         rulesCollectedThisTick.clear();
         session.fireAllRules();
@@ -114,6 +148,78 @@ public class SimulationEngine implements DisposableBean {
     public synchronized void setTickMinutes(long tickMinutes) {
         this.tickMinutes = clampTickMinutes(tickMinutes);
         broadcastSnapshot();
+    }
+
+    public boolean hasMachine(String machineId) {
+        return machineId != null && !machineId.isBlank() && machineRegistry.hasMachine(machineId.trim());
+    }
+
+    public synchronized MachineHealthReport machineHealthReport(String machineId) {
+        if (session == null || machineId == null || machineId.isBlank()) {
+            return null;
+        }
+        String id = machineId.trim();
+        if (!machineRegistry.hasMachine(id)) {
+            return null;
+        }
+        QueryResults results = session.getQueryResults("MachineHealth", id);
+        if (results == null || results.size() == 0) {
+            return null;
+        }
+        QueryResultsRow row = results.iterator().next();
+        int a = queryCount(row, "$a");
+        int iv = queryCount(row, "$i");
+        int u = queryCount(row, "$u");
+        int f = queryCount(row, "$f");
+        int hp = queryCount(row, "$health");
+        MachineHealthReport r = new MachineHealthReport();
+        r.setMachineId(id);
+        r.setHealthPercent(hp);
+        r.setAnomalyCount(a);
+        r.setInterventionCount(iv);
+        r.setUnsafeReasonCount(u);
+        r.setFixCount(f);
+        appendRecordedHistories(session, id, r);
+        return r;
+    }
+
+    private static int queryCount(QueryResultsRow row, String decl) {
+        Object o = row.get(decl);
+        if (o instanceof Number n) {
+            return n.intValue();
+        }
+        return 0;
+    }
+
+    private static void appendRecordedHistories(KieSession session, String id, MachineHealthReport r) {
+        Comparator<Instant> byTime = Comparator.nullsFirst(Comparator.naturalOrder());
+        WorkingMemoryOps.getFacts(session, RecordedAnomaly.class).stream()
+                .filter(x -> id.equals(x.getMachineId()))
+                .sorted(Comparator.comparing(RecordedAnomaly::getRecordedAt, byTime).reversed())
+                .forEach(x -> r.getAnomalyHistory()
+                        .add(new MachineHealthReport.AnomalyHistoryLine(
+                                x.getTypeName(), x.getDescription(), instantToString(x.getRecordedAt()))));
+        WorkingMemoryOps.getFacts(session, RecordedIntervention.class).stream()
+                .filter(x -> id.equals(x.getMachineId()))
+                .sorted(Comparator.comparing(RecordedIntervention::getRecordedAt, byTime).reversed())
+                .forEach(x -> r.getInterventionHistory()
+                        .add(new MachineHealthReport.InterventionHistoryLine(
+                                x.getPriority(), x.getRecommendation(), instantToString(x.getRecordedAt()))));
+        WorkingMemoryOps.getFacts(session, RecordedUnsafeReason.class).stream()
+                .filter(x -> id.equals(x.getMachineId()))
+                .sorted(Comparator.comparing(RecordedUnsafeReason::getRecordedAt, byTime).reversed())
+                .forEach(x -> r.getUnsafeReasonHistory()
+                        .add(new MachineHealthReport.UnsafeReasonHistoryLine(
+                                x.getCode(), x.getDetails(), instantToString(x.getRecordedAt()))));
+        WorkingMemoryOps.getFacts(session, RecordedFix.class).stream()
+                .filter(x -> id.equals(x.getMachineId()))
+                .sorted(Comparator.comparing(RecordedFix::getRecordedAt, byTime).reversed())
+                .forEach(x -> r.getFixHistory()
+                        .add(new MachineHealthReport.FixHistoryLine(instantToString(x.getRecordedAt()))));
+    }
+
+    private static String instantToString(Instant i) {
+        return i == null ? "" : i.toString();
     }
 
     public synchronized void setMachineWorkload(String machineId, MachineWorkload workload, String metricKey) {
@@ -163,6 +269,7 @@ public class SimulationEngine implements DisposableBean {
         if (!known) {
             return;
         }
+        session.insert(new RecordedFix(machineId, simulatedTime));
         WorkingMemoryOps.deleteFactsForMachine(session, Anomaly.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, Intervention.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, UnsafeReason.class, machineId);

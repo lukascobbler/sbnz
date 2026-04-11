@@ -1,15 +1,19 @@
 package rules;
 
-import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.Intervention;
-import com.luka.kbpdm.domain.PriorityLevel;
-import com.luka.kbpdm.domain.SafetyCheck;
-import com.luka.kbpdm.domain.SafetyResult;
-import com.luka.kbpdm.domain.UnsafeReason;
-import com.luka.kbpdm.domain.SimulatedClock;
-import com.luka.kbpdm.domain.TickStatus;
-import com.luka.kbpdm.domain.MetricTick;
-import com.luka.kbpdm.domain.CurrentMetric;
+import com.luka.kbpdm.domain.machine.Machine;
+import com.luka.kbpdm.domain.diagnosis.Intervention;
+import com.luka.kbpdm.domain.diagnosis.PriorityLevel;
+import com.luka.kbpdm.domain.safety.SafetyCheck;
+import com.luka.kbpdm.domain.safety.SafetyResult;
+import com.luka.kbpdm.domain.safety.UnsafeReason;
+import com.luka.kbpdm.domain.telemetry.SimulatedClock;
+import com.luka.kbpdm.domain.telemetry.TickStatus;
+import com.luka.kbpdm.domain.telemetry.MetricTick;
+import com.luka.kbpdm.domain.telemetry.CurrentMetric;
+import com.luka.kbpdm.domain.health.RecordedAnomaly;
+import com.luka.kbpdm.domain.health.RecordedIntervention;
+import com.luka.kbpdm.domain.health.RecordedUnsafeReason;
+import com.luka.kbpdm.domain.health.RecordedFix;
 
 dialect "java"
 
@@ -136,4 +140,14 @@ when
   not SafetyResult( machineId == $id )
 then
   insert(new SafetyResult($id, true, "No safety issues detected.", $check.getCheckedAt()));
+end
+
+// Cumulative health % from Recorded* facts: −1% per anomaly, −2% per intervention, −4% per unsafe (halt) event, +1% per fix.
+query MachineHealth(String m)
+  Machine(machineId == m)
+  $a : Number() from accumulate(RecordedAnomaly(machineId == m), count(1))
+  $i : Number() from accumulate(RecordedIntervention(machineId == m), count(1))
+  $u : Number() from accumulate(RecordedUnsafeReason(machineId == m), count(1))
+  $f : Number() from accumulate(RecordedFix(machineId == m), count(1))
+  $health : Integer() from (Integer)(int)Math.max(0, Math.min(100, Math.round(100.0 - 1*$a.doubleValue() - 2*$i.doubleValue() - 4*$u.doubleValue() + 1*$f.doubleValue())))
 end

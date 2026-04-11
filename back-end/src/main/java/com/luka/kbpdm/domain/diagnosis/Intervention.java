@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.diagnosis;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -24,4 +24,3 @@ public class Intervention {
         this(machineId, priority, null, recommendation, decidedAt);
     }
 }
-

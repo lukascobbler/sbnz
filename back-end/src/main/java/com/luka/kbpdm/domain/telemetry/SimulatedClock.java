@@ -1,4 +1,4 @@
-package com.luka.kbpdm.domain;
+package com.luka.kbpdm.domain.telemetry;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

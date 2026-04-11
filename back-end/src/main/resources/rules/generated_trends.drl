@@ -1,8 +1,8 @@
 package rules;
-import com.luka.kbpdm.domain.Anomaly;
-import com.luka.kbpdm.domain.AnomalyType;
-import com.luka.kbpdm.domain.MetricTick;
-import com.luka.kbpdm.domain.SimulatedClock;
+import com.luka.kbpdm.domain.diagnosis.Anomaly;
+import com.luka.kbpdm.domain.diagnosis.AnomalyType;
+import com.luka.kbpdm.domain.telemetry.MetricTick;
+import com.luka.kbpdm.domain.telemetry.SimulatedClock;
 import java.lang.Number;
 dialect "java"
 

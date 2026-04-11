@@ -7,11 +7,11 @@ description
 
 package rules;
 
-import com.luka.kbpdm.domain.Machine;
-import com.luka.kbpdm.domain.TelemetryReading;
-import com.luka.kbpdm.domain.Anomaly;
-import com.luka.kbpdm.domain.AnomalyType;
-import com.luka.kbpdm.domain.SimulatedClock;
+import com.luka.kbpdm.domain.machine.Machine;
+import com.luka.kbpdm.domain.telemetry.TelemetryReading;
+import com.luka.kbpdm.domain.diagnosis.Anomaly;
+import com.luka.kbpdm.domain.diagnosis.AnomalyType;
+import com.luka.kbpdm.domain.telemetry.SimulatedClock;
 
 dialect "java"
 
