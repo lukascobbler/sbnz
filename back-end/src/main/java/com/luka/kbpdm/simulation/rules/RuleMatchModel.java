@@ -56,7 +56,7 @@ public final class RuleMatchModel {
         if (o instanceof SafetyCheck s) {
             return s.getMachineId();
         }
-        if (o instanceof UnsafeReason u) {
+        if (o instanceof MachineOverworked u) {
             return u.getMachineId();
         }
         if (o instanceof SafetyResult s) {
@@ -74,7 +74,7 @@ public final class RuleMatchModel {
         if (o instanceof RecordedIntervention r) {
             return r.getMachineId();
         }
-        if (o instanceof RecordedUnsafeReason r) {
+        if (o instanceof RecordedMachineOverworked r) {
             return r.getMachineId();
         }
         if (o instanceof RecordedFix r) {

@@ -17,12 +17,12 @@ public class MachineHealthReport {
 
     private int anomalyCount;
     private int interventionCount;
-    private int unsafeReasonCount;
+    private int machineOverworkedCount;
     private int fixCount;
 
     private List<AnomalyHistoryLine> anomalyHistory = new ArrayList<>();
     private List<InterventionHistoryLine> interventionHistory = new ArrayList<>();
-    private List<UnsafeReasonHistoryLine> unsafeReasonHistory = new ArrayList<>();
+    private List<MachineOverworkedHistoryLine> machineOverworkedHistory = new ArrayList<>();
     private List<FixHistoryLine> fixHistory = new ArrayList<>();
 
     @Data
@@ -46,8 +46,7 @@ public class MachineHealthReport {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UnsafeReasonHistoryLine {
-        private String code;
+    public static class MachineOverworkedHistoryLine {
         private String details;
         private String at;
     }

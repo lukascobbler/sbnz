@@ -2,7 +2,6 @@ package com.luka.kbpdm.simulation.machines;
 
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,8 +38,6 @@ public final class MachineProcessRegistry {
                 "Plant climate",
                 CLIMATE,
                 ENV_SENSOR,
-                Duration.ofDays(365),
-                Duration.ofDays(120),
                 List.of(
                         new MetricProfile("AMBIENT_C", "Ambient temperature", "C", 1, 21.0, 0.14, 29.0, null, true, false),
                         new MetricProfile("HUMIDITY_PCT", "Humidity", "%RH", 1, 52.0, 0.75, 64.0, null, true, false)
@@ -54,8 +51,6 @@ public final class MachineProcessRegistry {
                 "Conveyor line",
                 CONVEYOR,
                 BEARING,
-                Duration.ofDays(30),
-                Duration.ofDays(25),
                 List.of(
                         new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 3.35, 0.09, 3.85, 4.4, true, true),
                         new MetricProfile("BELT_SPEED_PCT", "Belt speed", "%", 1, 95.0, 0.95, null, null, true, true)
@@ -69,8 +64,6 @@ public final class MachineProcessRegistry {
                 "CNC mill",
                 CNC,
                 MOTOR,
-                Duration.ofDays(90),
-                Duration.ofDays(10),
                 List.of(
                         new MetricProfile("TEMPERATURE_C", "Temperature", "C", 2, 59.0, 0.28, 67.5, 78.0, true, true),
                         new MetricProfile("VIBRATION_RMS", "Vibration", "RMS", 2, 4.65, 0.07, 5.35, 5.9, true, true),
@@ -85,8 +78,6 @@ public final class MachineProcessRegistry {
                 "Auto packer",
                 PACK_LINE,
                 SEALING,
-                Duration.ofDays(45),
-                Duration.ofDays(14),
                 List.of(
                         new MetricProfile("CASES_PER_MIN", "Throughput", "cases/min", 1, 118.0, 2.4, null, null, true, true),
                         new MetricProfile("REJECT_PCT", "Reject rate", "%", 2, 1.8, 0.1, 4.5, null, true, true),

@@ -6,7 +6,7 @@ import com.luka.kbpdm.domain.diagnosis.Intervention;
 import com.luka.kbpdm.domain.machine.ComponentStatus;
 import com.luka.kbpdm.domain.machine.Machine;
 import com.luka.kbpdm.domain.safety.SafetyResult;
-import com.luka.kbpdm.domain.safety.UnsafeReason;
+import com.luka.kbpdm.domain.safety.MachineOverworked;
 import com.luka.kbpdm.domain.telemetry.TelemetryReading;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,6 +41,6 @@ public class SimulationReport {
     private List<Intervention> interventions = new ArrayList<>();
 
     private List<ComponentStatus> components = new ArrayList<>();
-    private List<UnsafeReason> unsafeReasons = new ArrayList<>();
+    private List<MachineOverworked> machineOverworked = new ArrayList<>();
     private List<SafetyResult> safetyResults = new ArrayList<>();
 }

@@ -119,7 +119,7 @@ public class SimulationEngine implements DisposableBean {
                 Object o = e.getObject();
                 if (o instanceof RecordedAnomaly
                         || o instanceof RecordedIntervention
-                        || o instanceof RecordedUnsafeReason
+                        || o instanceof RecordedMachineOverworked
                         || o instanceof RecordedFix) {
                     return;
                 }
@@ -131,9 +131,9 @@ public class SimulationEngine implements DisposableBean {
                     String pri = i.getPriority() == null ? "" : i.getPriority().name();
                     Instant at = i.getDecidedAt() != null ? i.getDecidedAt() : simulatedTime;
                     session.insert(new RecordedIntervention(i.getMachineId(), pri, i.getRecommendation(), at));
-                } else if (o instanceof UnsafeReason u) {
-                    session.insert(new RecordedUnsafeReason(
-                            u.getMachineId(), u.getCode(), u.getDetails(), simulatedTime));
+                } else if (o instanceof MachineOverworked u) {
+                    session.insert(new RecordedMachineOverworked(
+                            u.getMachineId(), u.getDetails(), simulatedTime));
                 }
             }
         });
@@ -173,7 +173,7 @@ public class SimulationEngine implements DisposableBean {
         r.setHealthPercent(hp);
         r.setAnomalyCount(a);
         r.setInterventionCount(iv);
-        r.setUnsafeReasonCount(u);
+        r.setMachineOverworkedCount(u);
         r.setFixCount(f);
         appendRecordedHistories(session, id, r);
         return r;
@@ -201,12 +201,12 @@ public class SimulationEngine implements DisposableBean {
                 .forEach(x -> r.getInterventionHistory()
                         .add(new MachineHealthReport.InterventionHistoryLine(
                                 x.getPriority(), x.getRecommendation(), instantToString(x.getRecordedAt()))));
-        WorkingMemoryOps.getFacts(session, RecordedUnsafeReason.class).stream()
+        WorkingMemoryOps.getFacts(session, RecordedMachineOverworked.class).stream()
                 .filter(x -> id.equals(x.getMachineId()))
-                .sorted(Comparator.comparing(RecordedUnsafeReason::getRecordedAt, byTime).reversed())
-                .forEach(x -> r.getUnsafeReasonHistory()
-                        .add(new MachineHealthReport.UnsafeReasonHistoryLine(
-                                x.getCode(), x.getDetails(), instantToString(x.getRecordedAt()))));
+                .sorted(Comparator.comparing(RecordedMachineOverworked::getRecordedAt, byTime).reversed())
+                .forEach(x -> r.getMachineOverworkedHistory()
+                        .add(new MachineHealthReport.MachineOverworkedHistoryLine(
+                                x.getDetails(), instantToString(x.getRecordedAt()))));
         WorkingMemoryOps.getFacts(session, RecordedFix.class).stream()
                 .filter(x -> id.equals(x.getMachineId()))
                 .sorted(Comparator.comparing(RecordedFix::getRecordedAt, byTime).reversed())
@@ -265,7 +265,7 @@ public class SimulationEngine implements DisposableBean {
         session.insert(new RecordedFix(machineId, simulatedTime));
         WorkingMemoryOps.deleteFactsForMachine(session, Anomaly.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, Intervention.class, machineId);
-        WorkingMemoryOps.deleteFactsForMachine(session, UnsafeReason.class, machineId);
+        WorkingMemoryOps.deleteFactsForMachine(session, MachineOverworked.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, SafetyResult.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, SafetyCheck.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, TickStatus.class, machineId);
@@ -342,7 +342,7 @@ public class SimulationEngine implements DisposableBean {
 
             WorkingMemoryOps.deleteFactsOfType(session, SafetyCheck.class);
             WorkingMemoryOps.deleteFactsOfType(session, SafetyResult.class);
-            WorkingMemoryOps.deleteTransientUnsafeReasons(session);
+            WorkingMemoryOps.deleteTransientMachineOverworked(session);
 
             refreshSimulatedClock();
 
@@ -439,8 +439,7 @@ public class SimulationEngine implements DisposableBean {
             session.insert(new ComponentStatus(
                     p.machineId(),
                     p.componentType(),
-                    simulatedTime.minus(p.componentAgeAtStart()),
-                    p.serviceInterval()
+                    simulatedTime
             ));
             telemetry.resetToNominal(sensors, simulatedTime, p);
         }

@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UnsafeReason {
+public class MachineOverworked {
     private String machineId;
-    private String code;
     private String details;
 }

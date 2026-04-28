@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Duration;
 import java.time.Instant;
 
 @Data
@@ -15,5 +14,4 @@ public class ComponentStatus {
     private ComponentType component;
 
     private Instant lastServicedAt;
-    private Duration serviceInterval;
 }

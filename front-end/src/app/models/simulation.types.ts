@@ -59,11 +59,11 @@ export interface MachineHealthReport {
   healthPercent: number;
   anomalyCount: number;
   interventionCount: number;
-  unsafeReasonCount: number;
+  machineOverworkedCount: number;
   fixCount: number;
   anomalyHistory: { type: string; description: string; at: string }[];
   interventionHistory: { priority: string; recommendation: string; at: string }[];
-  unsafeReasonHistory: { code: string; details: string; at: string }[];
+  machineOverworkedHistory: { details: string; at: string }[];
   fixHistory: { at: string }[];
 }
 

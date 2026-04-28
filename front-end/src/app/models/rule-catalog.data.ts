@@ -117,7 +117,7 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     section: L2,
     title: 'Safety evaluation: not safe',
     description:
-      'Runs when a safety check is requested for a machine that already has an unsafe reason and no safety outcome exists yet.',
+      'Runs when a safety check is requested for a machine that already has a MachineOverworked fact and no safety outcome exists yet.',
     fromTemplate: false,
     produces: ['Safety result'],
   },
@@ -126,7 +126,7 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     section: L2,
     title: 'Safety evaluation: safe',
     description:
-      'Runs when a safety check is requested, no unsafe reason is present, and no safety outcome exists yet.',
+      'Runs when a safety check is requested, no MachineOverworked fact is present, and no safety outcome exists yet.',
     fromTemplate: false,
     produces: ['Safety result'],
   },
@@ -188,9 +188,9 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     section: CEP,
     title: 'Stop machine after repeated stress on critical sensors',
     description:
-      'Runs when this machine does not yet have an operator-halt unsafe reason, no critical halt recommendation exists for it yet, and its stress indicator stayed true across five consecutive linked checks on the timeline for any of its critical sensors.',
+      'Runs when this machine does not yet have MachineOverworked, no critical halt recommendation exists for it yet, and its stress indicator stayed true across five consecutive linked checks on the timeline for any of its critical sensors.',
     fromTemplate: false,
-    produces: ['Unsafe reason', 'Intervention'],
+    produces: ['MachineOverworked', 'Intervention'],
   },
 
   ...trendPair(

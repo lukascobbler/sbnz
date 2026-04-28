@@ -22,12 +22,10 @@ public final class WorkingMemoryOps {
         return out;
     }
 
-    public static final String OPERATOR_HALT_CODE = "OPERATOR_HALT";
-
     public static Set<String> haltedMachineIds(KieSession session) {
         Set<String> set = new HashSet<>();
-        for (UnsafeReason u : getFacts(session, UnsafeReason.class)) {
-            if (u.getMachineId() != null && OPERATOR_HALT_CODE.equals(u.getCode())) {
+        for (MachineOverworked u : getFacts(session, MachineOverworked.class)) {
+            if (u.getMachineId() != null) {
                 set.add(u.getMachineId());
             }
         }
@@ -44,17 +42,7 @@ public final class WorkingMemoryOps {
         }
     }
 
-    public static void deleteTransientUnsafeReasons(KieSession session) {
-        for (Object o : new ArrayList<>(session.getObjects(new ClassObjectFilter(UnsafeReason.class)))) {
-            UnsafeReason u = (UnsafeReason) o;
-            if (OPERATOR_HALT_CODE.equals(u.getCode())) {
-                continue;
-            }
-            FactHandle fh = session.getFactHandle(o);
-            if (fh != null) {
-                session.delete(fh);
-            }
-        }
+    public static void deleteTransientMachineOverworked(KieSession session) {
     }
 
     public static void deleteFactsForMachine(KieSession session, Class<?> type, String machineId) {
@@ -87,7 +75,7 @@ public final class WorkingMemoryOps {
         if (o instanceof MetricTick t) {
             return t.getMachineId();
         }
-        if (o instanceof UnsafeReason u) {
+        if (o instanceof MachineOverworked u) {
             return u.getMachineId();
         }
         if (o instanceof SafetyResult s) {
@@ -102,7 +90,7 @@ public final class WorkingMemoryOps {
         if (o instanceof RecordedIntervention r) {
             return r.getMachineId();
         }
-        if (o instanceof RecordedUnsafeReason r) {
+        if (o instanceof RecordedMachineOverworked r) {
             return r.getMachineId();
         }
         if (o instanceof RecordedFix r) {

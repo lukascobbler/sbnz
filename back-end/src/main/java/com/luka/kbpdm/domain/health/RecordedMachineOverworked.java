@@ -10,9 +10,8 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecordedUnsafeReason {
+public class RecordedMachineOverworked {
     private String machineId;
-    private String code;
     private String details;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

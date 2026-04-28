@@ -6,7 +6,7 @@ import com.luka.kbpdm.domain.diagnosis.Intervention;
 import com.luka.kbpdm.domain.machine.ComponentStatus;
 import com.luka.kbpdm.domain.machine.Machine;
 import com.luka.kbpdm.domain.safety.SafetyResult;
-import com.luka.kbpdm.domain.safety.UnsafeReason;
+import com.luka.kbpdm.domain.safety.MachineOverworked;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
 import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
@@ -49,7 +49,7 @@ public final class SimulationSnapshotBuilder {
         r.setAnomalies(sortAnomalies(new ArrayList<>(WorkingMemoryOps.getFacts(session, Anomaly.class)), nameByMachineId));
         r.setInterventions(sortInterventions(new ArrayList<>(WorkingMemoryOps.getFacts(session, Intervention.class)), nameByMachineId));
         r.setComponents(WorkingMemoryOps.getFacts(session, ComponentStatus.class));
-        r.setUnsafeReasons(WorkingMemoryOps.getFacts(session, UnsafeReason.class));
+        r.setMachineOverworked(WorkingMemoryOps.getFacts(session, MachineOverworked.class));
         r.setSafetyResults(sortSafetyResults(new ArrayList<>(WorkingMemoryOps.getFacts(session, SafetyResult.class)), nameByMachineId));
         r.setRulesFiredThisTick(new ArrayList<>(rulesFromLastCompletedTick));
         return r;

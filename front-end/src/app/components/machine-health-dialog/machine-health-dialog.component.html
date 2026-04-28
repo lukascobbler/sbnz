@@ -80,12 +80,12 @@
             </ul>
           </section>
           <section class="mh-history-block">
-            <h3 class="mh-history-title">Unsafe (halts) <span class="muted count">({{ r.unsafeReasonCount }})</span></h3>
+            <h3 class="mh-history-title">Machine overworked <span class="muted count">({{ r.machineOverworkedCount }})</span></h3>
             <ul class="mh-list dashboard-scroll-body">
-              @for (row of rev(r.unsafeReasonHistory); track $index) {
+              @for (row of rev(r.machineOverworkedHistory); track $index) {
                 <li class="mh-li">
                   <span class="mono muted small">{{ row.at | prettyDate }}</span>
-                  <span class="pill bad">{{ row.code }}</span>
+                  <span class="pill bad">MachineOverworked</span>
                   <span class="mh-li-text">{{ row.details }}</span>
                 </li>
               } @empty {

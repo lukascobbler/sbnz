@@ -3,7 +3,6 @@ package com.luka.kbpdm.simulation.machines;
 import com.luka.kbpdm.domain.machine.ComponentType;
 import com.luka.kbpdm.domain.machine.MachineType;
 
-import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,6 @@ public record MachineProcessProfile(
         String displayName,
         MachineType machineType,
         ComponentType componentType,
-        Duration serviceInterval,
-        Duration componentAgeAtStart,
         List<MetricProfile> metrics
 ) {
     public MachineProcessProfile {
@@ -23,8 +20,6 @@ public record MachineProcessProfile(
         Objects.requireNonNull(displayName, "displayName");
         Objects.requireNonNull(machineType, "machineType");
         Objects.requireNonNull(componentType, "componentType");
-        Objects.requireNonNull(serviceInterval, "serviceInterval");
-        Objects.requireNonNull(componentAgeAtStart, "componentAgeAtStart");
         Objects.requireNonNull(metrics, "metrics");
         if (metrics.isEmpty()) {
             throw new IllegalArgumentException(machineId + ": machine must define at least one metric");
