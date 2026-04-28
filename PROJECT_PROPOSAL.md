@@ -201,32 +201,33 @@ Zajednička logika za svako L1 pravilo:
 
 ### 5.2 L2 pravila za safety evaluaciju
 
-1. Safety evaluation: not safe
- Uslov: zatražen je SafetyCheck, postoji MachineOverworked, a SafetyResult još nije upisan.
- Ishod: upisuje se SafetyResult(safe=false, reason=...).
-
-2. Safety evaluation: safe
- Uslov: zatražen je SafetyCheck, ne postoji MachineOverworked, a SafetyResult još nije upisan.
- Ishod: upisuje se SafetyResult(safe=true, reason="No safety issues detected.").
+| Pravilo | Uslov | Ishod |
+|---|---|---|
+| Safety evaluation: not safe | zatražen je SafetyCheck, postoji MachineOverworked, a SafetyResult još nije upisan | upisuje se SafetyResult(safe=false, reason=...) |
+| Safety evaluation: safe | zatražen je SafetyCheck, ne postoji MachineOverworked, a SafetyResult još nije upisan | upisuje se SafetyResult(safe=true, reason="No safety issues detected.") |
 
 ### 5.3 L3 pravila za kombinovane intervencije
 
 Ova pravila povezuju više metrika i generišu preporuku za operatera.
 
 1. Pushed conveyor line (belt speed, vibration, pack throughput)
+
  Uslov:
  - LIN.BELT_SPEED_PCT >= 99.0
  - LIN.VIBRATION_RMS >= 3.5
  - PKG.CASES_PER_MIN >= 125.0
  - ista intervencija još nije aktivna 
+ 
  Ishod: Intervention(HIGH, sourceRule=X_PUSHED_LINE)
 
-2. Conveyor line instability (belt speed, vibration, reject rate)
+1. Conveyor line instability (belt speed, vibration, reject rate)
+
  Uslov:
  - LIN.BELT_SPEED_PCT >= 99.0
  - LIN.VIBRATION_RMS >= 3.5
  - PKG.REJECT_PCT >= 2.0
  - ista intervencija još nije aktivna
+ 
  Ishod: Intervention(MEDIUM, sourceRule=X_LIN_INSTABILITY)
 
 ### 5.4 CEP pravilo za zaustavljanje mašina
@@ -250,13 +251,10 @@ Ishod:
 
 Za svaku metriku postoje u paru dva pravila:
 
-- rising over 10 steps
-Uslov: poslednjih 10 uzastopnih vrednosti je strogo rastuće.
-Ishod: dodaje se Anomaly(RISING_TREND) za datu metriku.
-
-- rising trend ended
-Uslov: trend anomalija je otvorena, a poslednjih 5 uzastopnih vrednosti je opadajuće.
-Ishod: briše se postojeća RISING_TREND anomalija.
+| Tip pravila          | Kada se aktivira                                                              | Ishod                                           |
+| -------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------- |
+| rising over 10 steps | poslednjih 10 uzastopnih vrednosti je strogo rastuće                          | dodaje se Anomaly(RISING_TREND) za datu metriku |
+| rising trend ended   | trend anomalija je otvorena, a poslednjih 5 uzastopnih vrednosti je opadajuće | briše se postojeća RISING_TREND anomalija       |
 
 ### 5.6 Query pravilo
 
@@ -271,9 +269,7 @@ Račun:
 health = `round(100 - anomalije - 2 * intervencije - 4 * unsafe + fix)`,
 - rezultat ograničava na opseg 0–100.
 
-Šta vraća:
-
-- finalni procenat zdravlja mašine.
+Ishod: vraća finalni procenat zdravlja mašine.
 
 ### 5.7 Sažetak ulančavanja kroz nivoe
 
