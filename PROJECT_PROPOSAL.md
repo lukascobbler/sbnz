@@ -188,39 +188,16 @@ Zajednička logika za svako L1 pravilo:
 - Pre dodavanja proverava se da ista otvorena anomalija već ne postoji za tu mašinu i metriku.
 - Ishod je nova anomalija tipa ABOVE_THRESHOLD.
 
-Detaljan spisak:
-
-1. Plant climate — Ambient temperature above high band
-   Uslov: CLM, AMBIENT_C >= 29.0
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=AMBIENT_C)
-
-2. Plant climate — Humidity above high band
-   Uslov: CLM, HUMIDITY_PCT >= 64.0
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=HUMIDITY_PCT)
-
-3. Conveyor line — Vibration above high band
-   Uslov: LIN, VIBRATION_RMS >= 3.85
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
-
-4. CNC mill — Temperature above high band
-   Uslov: CNC, TEMPERATURE_C >= 67.5
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=TEMPERATURE_C)
-
-5. CNC mill — Vibration above high band
-   Uslov: CNC, VIBRATION_RMS >= 5.35
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
-
-6. CNC mill — Spindle load above high band
-   Uslov: CNC, SPINDLE_LOAD_PCT >= 84.0
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SPINDLE_LOAD_PCT)
-
-7. Auto packer — Reject rate above high band
-   Uslov: PKG, REJECT_PCT >= 4.5
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=REJECT_PCT)
-
-8. Auto packer — Seal temperature above high band
-   Uslov: PKG, SEAL_TEMP_C >= 99.0
-   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SEAL_TEMP_C)
+| Pravilo                                             | Mašina | Metrika          | Uslov (prag) | Ishod                                                |
+| --------------------------------------------------- | ------ | ---------------- | ------------ | ---------------------------------------------------- |
+| Plant climate — Ambient temperature above high band | CLM    | AMBIENT_C        | >= 29.0      | Anomaly(ABOVE_THRESHOLD, metricKey=AMBIENT_C)        |
+| Plant climate — Humidity above high band            | CLM    | HUMIDITY_PCT     | >= 64.0      | Anomaly(ABOVE_THRESHOLD, metricKey=HUMIDITY_PCT)     |
+| Conveyor line — Vibration above high band           | LIN    | VIBRATION_RMS    | >= 3.85      | Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)    |
+| CNC mill — Temperature above high band              | CNC    | TEMPERATURE_C    | >= 67.5      | Anomaly(ABOVE_THRESHOLD, metricKey=TEMPERATURE_C)    |
+| CNC mill — Vibration above high band                | CNC    | VIBRATION_RMS    | >= 5.35      | Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)    |
+| CNC mill — Spindle load above high band             | CNC    | SPINDLE_LOAD_PCT | >= 84.0      | Anomaly(ABOVE_THRESHOLD, metricKey=SPINDLE_LOAD_PCT) |
+| Auto packer — Reject rate above high band           | PKG    | REJECT_PCT       | >= 4.5       | Anomaly(ABOVE_THRESHOLD, metricKey=REJECT_PCT)       |
+| Auto packer — Seal temperature above high band      | PKG    | SEAL_TEMP_C      | >= 99.0      | Anomaly(ABOVE_THRESHOLD, metricKey=SEAL_TEMP_C)      |
 
 ### 5.2 L2 pravila za safety evaluaciju
 
@@ -274,54 +251,12 @@ Ishod:
 Za svaku metriku postoje u paru dva pravila:
 
 - rising over 10 steps
-	Uslov: poslednjih 10 uzastopnih vrednosti je strogo rastuće.
-	Ishod: dodaje se Anomaly(RISING_TREND) za datu metriku.
+Uslov: poslednjih 10 uzastopnih vrednosti je strogo rastuće.
+Ishod: dodaje se Anomaly(RISING_TREND) za datu metriku.
 
 - rising trend ended
-	Uslov: trend anomalija je otvorena, a poslednjih 5 uzastopnih vrednosti je opadajuće.
-	Ishod: briše se postojeća RISING_TREND anomalija.
-
-Parovi trend pravila:
-
-1. Plant climate — Ambient temperature
-   Rastući trend: Plant climate — Ambient temperature rising over 10 steps
-   Kraj trenda: Plant climate — Ambient temperature rising trend ended
-
-2. Plant climate — Humidity
-   Rastući trend: Plant climate — Humidity rising over 10 steps
-   Kraj trenda: Plant climate — Humidity rising trend ended
-
-3. Conveyor line — Vibration
-   Rastući trend: Conveyor line — Vibration rising over 10 steps
-   Kraj trenda: Conveyor line — Vibration rising trend ended
-
-4. Conveyor line — Belt speed
-   Rastući trend: Conveyor line — Belt speed rising over 10 steps
-   Kraj trenda: Conveyor line — Belt speed rising trend ended
-
-5. CNC mill — Temperature
-   Rastući trend: CNC mill — Temperature rising over 10 steps
-   Kraj trenda: CNC mill — Temperature rising trend ended
-
-6. CNC mill — Vibration
-   Rastući trend: CNC mill — Vibration rising over 10 steps
-   Kraj trenda: CNC mill — Vibration rising trend ended
-
-7. CNC mill — Spindle load
-   Rastući trend: CNC mill — Spindle load rising over 10 steps
-   Kraj trenda: CNC mill — Spindle load rising trend ended
-
-8. Auto packer — Throughput
-   Rastući trend: Auto packer — Throughput rising over 10 steps
-   Kraj trenda: Auto packer — Throughput rising trend ended
-
-9. Auto packer — Reject rate
-   Rastući trend: Auto packer — Reject rate rising over 10 steps
-   Kraj trenda: Auto packer — Reject rate rising trend ended
-
-10. Auto packer — Seal temperature
-    Rastući trend: Auto packer — Seal temperature rising over 10 steps
-    Kraj trenda: Auto packer — Seal temperature rising trend ended
+Uslov: trend anomalija je otvorena, a poslednjih 5 uzastopnih vrednosti je opadajuće.
+Ishod: briše se postojeća RISING_TREND anomalija.
 
 ### 5.6 Query pravilo
 
