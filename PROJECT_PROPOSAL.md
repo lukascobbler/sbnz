@@ -191,36 +191,36 @@ Zajednička logika za svako L1 pravilo:
 Detaljan spisak:
 
 1. Plant climate — Ambient temperature above high band
- Uslov: CLM, AMBIENT_C >= 29.0
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=AMBIENT_C)
+   Uslov: CLM, AMBIENT_C >= 29.0
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=AMBIENT_C)
 
 2. Plant climate — Humidity above high band
- Uslov: CLM, HUMIDITY_PCT >= 64.0
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=HUMIDITY_PCT)
+   Uslov: CLM, HUMIDITY_PCT >= 64.0
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=HUMIDITY_PCT)
 
 3. Conveyor line — Vibration above high band
- Uslov: LIN, VIBRATION_RMS >= 3.85
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
+   Uslov: LIN, VIBRATION_RMS >= 3.85
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
 
 4. CNC mill — Temperature above high band
- Uslov: CNC, TEMPERATURE_C >= 67.5
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=TEMPERATURE_C)
+   Uslov: CNC, TEMPERATURE_C >= 67.5
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=TEMPERATURE_C)
 
 5. CNC mill — Vibration above high band
- Uslov: CNC, VIBRATION_RMS >= 5.35
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
+   Uslov: CNC, VIBRATION_RMS >= 5.35
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=VIBRATION_RMS)
 
 6. CNC mill — Spindle load above high band
- Uslov: CNC, SPINDLE_LOAD_PCT >= 84.0
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SPINDLE_LOAD_PCT)
+   Uslov: CNC, SPINDLE_LOAD_PCT >= 84.0
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SPINDLE_LOAD_PCT)
 
 7. Auto packer — Reject rate above high band
- Uslov: PKG, REJECT_PCT >= 4.5
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=REJECT_PCT)
+   Uslov: PKG, REJECT_PCT >= 4.5
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=REJECT_PCT)
 
 8. Auto packer — Seal temperature above high band
- Uslov: PKG, SEAL_TEMP_C >= 99.0
- Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SEAL_TEMP_C)
+   Uslov: PKG, SEAL_TEMP_C >= 99.0
+   Ishod: Anomaly(ABOVE_THRESHOLD, metricKey=SEAL_TEMP_C)
 
 ### 5.2 L2 pravila za safety evaluaciju
 
@@ -283,35 +283,45 @@ Za svaku metriku postoje u paru dva pravila:
 
 Parovi trend pravila:
 
-1. Plant climate — Ambient temperature rising over 10 steps
-Plant climate — Ambient temperature rising trend ended
+1. Plant climate — Ambient temperature
+   Rastući trend: Plant climate — Ambient temperature rising over 10 steps
+   Kraj trenda: Plant climate — Ambient temperature rising trend ended
 
-2. Plant climate — Humidity rising over 10 steps
-Plant climate — Humidity rising trend ended
+2. Plant climate — Humidity
+   Rastući trend: Plant climate — Humidity rising over 10 steps
+   Kraj trenda: Plant climate — Humidity rising trend ended
 
-3. Conveyor line — Vibration rising over 10 steps
-Conveyor line — Vibration rising trend ended
+3. Conveyor line — Vibration
+   Rastući trend: Conveyor line — Vibration rising over 10 steps
+   Kraj trenda: Conveyor line — Vibration rising trend ended
 
-4. Conveyor line — Belt speed rising over 10 steps
-Conveyor line — Belt speed rising trend ended
+4. Conveyor line — Belt speed
+   Rastući trend: Conveyor line — Belt speed rising over 10 steps
+   Kraj trenda: Conveyor line — Belt speed rising trend ended
 
-5. CNC mill — Temperature rising over 10 steps
-CNC mill — Temperature rising trend ended
+5. CNC mill — Temperature
+   Rastući trend: CNC mill — Temperature rising over 10 steps
+   Kraj trenda: CNC mill — Temperature rising trend ended
 
-6. CNC mill — Vibration rising over 10 steps
-CNC mill — Vibration rising trend ended
+6. CNC mill — Vibration
+   Rastući trend: CNC mill — Vibration rising over 10 steps
+   Kraj trenda: CNC mill — Vibration rising trend ended
 
-7. CNC mill — Spindle load rising over 10 steps
-CNC mill — Spindle load rising trend ended
+7. CNC mill — Spindle load
+   Rastući trend: CNC mill — Spindle load rising over 10 steps
+   Kraj trenda: CNC mill — Spindle load rising trend ended
 
-8. Auto packer — Throughput rising over 10 steps
-Auto packer — Throughput rising trend ended
+8. Auto packer — Throughput
+   Rastući trend: Auto packer — Throughput rising over 10 steps
+   Kraj trenda: Auto packer — Throughput rising trend ended
 
-9. Auto packer — Reject rate rising over 10 steps
-Auto packer — Reject rate rising trend ended
+9. Auto packer — Reject rate
+   Rastući trend: Auto packer — Reject rate rising over 10 steps
+   Kraj trenda: Auto packer — Reject rate rising trend ended
 
-10. Auto packer — Seal temperature rising over 10 steps
-Auto packer — Seal temperature rising trend ended
+10. Auto packer — Seal temperature
+    Rastući trend: Auto packer — Seal temperature rising over 10 steps
+    Kraj trenda: Auto packer — Seal temperature rising trend ended
 
 ### 5.6 Query pravilo
 
@@ -380,7 +390,7 @@ Zaključak:
 Intervencija srednjeg prioriteta za LIN sa konkretnom preporukom za mehaničku proveru.
 
 Kompleksnost:
-Korelacija signala između različitih delova linije (uzrok-posledica).
+Korelacija signala između različitih delova linije.
 
 ### Primer 2 – CEP pravilo sa vremenskim obrascem
 
