@@ -220,7 +220,7 @@ Ova pravila povezuju više metrika i generišu preporuku za operatera.
  
  Ishod: Intervention(HIGH, sourceRule=X_PUSHED_LINE)
 
-1. Conveyor line instability (belt speed, vibration, reject rate)
+2. Conveyor line instability (belt speed, vibration, reject rate)
 
  Uslov:
  - LIN.BELT_SPEED_PCT >= 99.0
