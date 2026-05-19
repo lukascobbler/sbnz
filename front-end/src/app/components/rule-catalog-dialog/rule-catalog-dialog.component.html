@@ -19,62 +19,58 @@
         @for (section of sectionOrder; track section) {
           <section class="catalog-section" [attr.aria-label]="sectionLabel[section]">
             <h3 class="catalog-section-title">{{ sectionLabel[section] }}</h3>
-            @if (section === 'QUERY' && entriesFor(section).length === 0) {
-              <p class="catalog-empty muted">No query rules are defined in the knowledge base yet.</p>
-            } @else {
-              <ul class="catalog-rule-list">
-                @for (r of entriesFor(section); track r.engineName) {
-                  <li
-                    class="catalog-rule-card"
-                    [id]="ruleDomId(r.engineName)"
-                    [class.catalog-rule-focused]="highlightEngineName === r.engineName"
-                  >
-                    <div class="catalog-rule-head">
-                      <span class="catalog-rule-name">{{ r.title }}</span>
-                      @if (r.fromTemplate) {
-                        <span class="badge-template" title="Rule text is produced from a template">From template</span>
+            <ul class="catalog-rule-list">
+              @for (r of entriesFor(section); track r.engineName) {
+                <li
+                  class="catalog-rule-card"
+                  [id]="ruleDomId(r.engineName)"
+                  [class.catalog-rule-focused]="highlightEngineName === r.engineName"
+                >
+                  <div class="catalog-rule-head">
+                    <span class="catalog-rule-name">{{ r.title }}</span>
+                    @if (r.fromTemplate) {
+                      <span class="badge-template" title="Rule text is produced from a template">From template</span>
+                    }
+                  </div>
+                  <p class="catalog-rule-desc">{{ r.description }}</p>
+                  @if (r.produces?.length) {
+                    <div class="catalog-rule-produces">
+                      @for (p of r.produces; track p) {
+                        <div class="produce-line">Produces: {{ p }}</div>
                       }
                     </div>
-                    <p class="catalog-rule-desc">{{ r.description }}</p>
-                    @if (r.produces?.length) {
-                      <div class="catalog-rule-produces">
-                        @for (p of r.produces; track p) {
-                          <div class="produce-line">Produces: {{ p }}</div>
-                        }
-                      </div>
-                    }
-                    @if (r.clearCounterpart) {
-                      <div class="clearable-wrap">
-                        <button
-                          type="button"
-                          class="clearable-toggle"
-                          [attr.aria-expanded]="isClearExpanded(r.engineName)"
-                          (click)="toggleClear(r.engineName)"
-                        >
-                          <span class="clearable-chevron">{{ isClearExpanded(r.engineName) ? '▼' : '▶' }}</span>
-                          Clearable
-                          <span class="clearable-sub muted">clearing rule</span>
-                        </button>
-                        @if (isClearExpanded(r.engineName)) {
-                          <div
-                            class="clear-counterpart"
-                            [class.clear-counterpart-focused]="
+                  }
+                  @if (r.clearCounterpart) {
+                    <div class="clearable-wrap">
+                      <button
+                        type="button"
+                        class="clearable-toggle"
+                        [attr.aria-expanded]="isClearExpanded(r.engineName)"
+                        (click)="toggleClear(r.engineName)"
+                      >
+                        <span class="clearable-chevron">{{ isClearExpanded(r.engineName) ? '▼' : '▶' }}</span>
+                        Clearable
+                        <span class="clearable-sub muted">clearing rule</span>
+                      </button>
+                      @if (isClearExpanded(r.engineName)) {
+                        <div
+                          class="clear-counterpart"
+                          [class.clear-counterpart-focused]="
                               focusedClearRuleName === r.clearCounterpart.engineName
                             "
-                          >
-                            <div class="clear-counterpart-title">{{ r.clearCounterpart.title }}</div>
-                            <p class="clear-counterpart-desc">{{ r.clearCounterpart.description }}</p>
-                            @for (rem of r.clearCounterpart.removes; track rem) {
-                              <div class="produce-line remove-line">Removes: {{ rem }}</div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    }
-                  </li>
-                }
-              </ul>
-            }
+                        >
+                          <div class="clear-counterpart-title">{{ r.clearCounterpart.title }}</div>
+                          <p class="clear-counterpart-desc">{{ r.clearCounterpart.description }}</p>
+                          @for (rem of r.clearCounterpart.removes; track rem) {
+                            <div class="produce-line remove-line">Removes: {{ rem }}</div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
           </section>
         }
       </div>

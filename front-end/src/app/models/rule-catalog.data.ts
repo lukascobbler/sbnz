@@ -38,79 +38,89 @@ function trendPair(
   ];
 }
 
+function highBandPair(
+  machine: string,
+  metric: string,
+  riseWhen: string,
+  clearWhen: string
+): RuleCatalogEntry[] {
+  const riseTitle = `${machine} — ${metric} above high band`;
+  const clearTitle = `${machine} — ${metric} no longer above high band`;
+  return [
+    {
+      engineName: riseTitle,
+      section: L1,
+      title: riseTitle,
+      description: riseWhen,
+      fromTemplate: true,
+      produces: ['Anomaly'],
+      clearCounterpart: {
+        engineName: clearTitle,
+        title: clearTitle,
+        description: clearWhen,
+        removes: ['Anomaly'],
+      },
+    },
+    {
+      engineName: clearTitle,
+      section: L1,
+      title: clearTitle,
+      description: clearWhen,
+      fromTemplate: true,
+      catalogHidden: true,
+    },
+  ];
+}
+
 export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
-  {
-    engineName: 'Plant climate — Ambient temperature above high band',
-    section: L1,
-    title: 'Plant climate — Ambient temperature above high band',
-    description:
-      'Runs when the latest ambient temperature reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'Plant climate — Humidity above high band',
-    section: L1,
-    title: 'Plant climate — Humidity above high band',
-    description:
-      'Runs when the latest humidity reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'Conveyor line — Vibration above high band',
-    section: L1,
-    title: 'Conveyor line — Vibration above high band',
-    description:
-      'Runs when the latest vibration reading for the conveyor reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'CNC mill — Temperature above high band',
-    section: L1,
-    title: 'CNC mill — Temperature above high band',
-    description:
-      'Runs when the latest temperature reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'CNC mill — Vibration above high band',
-    section: L1,
-    title: 'CNC mill — Vibration above high band',
-    description:
-      'Runs when the latest vibration reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'CNC mill — Spindle load above high band',
-    section: L1,
-    title: 'CNC mill — Spindle load above high band',
-    description:
-      'Runs when the latest spindle load reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'Auto packer — Reject rate above high band',
-    section: L1,
-    title: 'Auto packer — Reject rate above high band',
-    description:
-      'Runs when the latest reject rate for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
-  {
-    engineName: 'Auto packer — Seal temperature above high band',
-    section: L1,
-    title: 'Auto packer — Seal temperature above high band',
-    description:
-      'Runs when the latest seal temperature for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
-    fromTemplate: true,
-    produces: ['Anomaly'],
-  },
+  ...highBandPair(
+    'Plant climate',
+    'Ambient temperature',
+    'Runs when the latest ambient temperature reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any ambient temperature readings for plant climate reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'Plant climate',
+    'Humidity',
+    'Runs when the latest humidity reading for plant climate reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any humidity readings for plant climate reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'Conveyor line',
+    'Vibration',
+    'Runs when the latest vibration reading for the conveyor reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any vibration readings for the conveyor reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'CNC mill',
+    'Temperature',
+    'Runs when the latest temperature reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any temperature readings for the CNC mill reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'CNC mill',
+    'Vibration',
+    'Runs when the latest vibration reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any vibration readings for the CNC mill reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'CNC mill',
+    'Spindle load',
+    'Runs when the latest spindle load reading for the CNC mill reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any spindle load readings for the CNC mill reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'Auto packer',
+    'Reject rate',
+    'Runs when the latest reject rate for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any reject rate readings for the auto packer reaching or passing the high limit, clearing the open anomaly.'
+  ),
+  ...highBandPair(
+    'Auto packer',
+    'Seal temperature',
+    'Runs when the latest seal temperature for the auto packer reaches or passes its high limit, and the same issue is not already recorded as an open anomaly.',
+    'Runs when there are no longer any seal temperature readings for the auto packer reaching or passing the high limit, clearing the open anomaly.'
+  ),
 
   {
     engineName: 'Safety evaluation: not safe',
@@ -241,15 +251,6 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
     'Runs when the ten most recent seal temperature samples each read higher than the one before, and no rising-trend anomaly is already open for this signal.',
     'Runs when a seal-temperature rising-trend anomaly is open and the last five samples each read lower than the previous.'
   ),
-
-  {
-    engineName: 'MachineHealth',
-    section: QUERY,
-    title: 'Machine health',
-    description:
-      'Answers “how healthy is this machine right now?” for the one you picked. It looks at what has already been logged for that machine—issues spotted, steps taken, times it had to stop for safety, and times an operator cleared a problem—and turns that into a single score from 0 to 100. Nothing new is written to the log when you ask; it only reads what is already there.',
-    fromTemplate: false,
-  },
 ];
 
 const byEngineName = new Map<string, RuleCatalogEntry>(RULE_CATALOG_ENTRIES.map((r) => [r.engineName, r]));

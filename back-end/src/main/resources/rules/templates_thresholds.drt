@@ -1,5 +1,6 @@
 template header
-ruleName
+aboveRuleName
+clearRuleName
 machineId
 metricKey
 high
@@ -17,7 +18,7 @@ dialect "java"
 
 template "threshold-to-anomaly"
 
-rule "@{ruleName}"
+rule "@{aboveRuleName}"
 salience 50
 when
   SimulatedClock( $t : now )
@@ -32,6 +33,16 @@ then
       "@{description}",
       $t
   ));
+end
+
+rule "@{clearRuleName}"
+salience 50
+when
+  $m : Machine( machineId == "@{machineId}" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "@{metricKey}" )
+  not TelemetryReading( machineId == $m.machineId, metric == "@{metricKey}", value >= @{high} )
+then
+  delete($a);
 end
 
 end template

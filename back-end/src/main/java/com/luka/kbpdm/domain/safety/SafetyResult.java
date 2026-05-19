@@ -13,6 +13,7 @@ import java.time.Instant;
 public class SafetyResult {
     private String machineId;
     private String reason;
+    private boolean safe;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant evaluatedAt;

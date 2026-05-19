@@ -119,7 +119,7 @@ when
   $reason : MachineOverworked( machineId == $id )
   not SafetyResult( machineId == $id )
 then
-  insert(new SafetyResult($id, "MACHINE_OVERWORKED: " + $reason.getDetails(), $check.getCheckedAt()));
+  insert(new SafetyResult($id, "MACHINE_OVERWORKED: " + $reason.getDetails(), false, $check.getCheckedAt()));
 end
 
 rule "Safety evaluation: safe"
@@ -129,5 +129,5 @@ when
   not MachineOverworked( machineId == $id )
   not SafetyResult( machineId == $id )
 then
-  insert(new SafetyResult($id, "No safety issues detected.", $check.getCheckedAt()));
+  insert(new SafetyResult($id, "No safety issues detected.", true, $check.getCheckedAt()));
 end

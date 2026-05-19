@@ -22,6 +22,15 @@ then
       $t
   ));
 end
+rule "Plant climate — Ambient temperature no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "CLM" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "AMBIENT_C" )
+  not TelemetryReading( machineId == $m.machineId, metric == "AMBIENT_C", value >= 29.0 )
+then
+  delete($a);
+end
 
 rule "Plant climate — Humidity above high band"
 salience 50
@@ -38,6 +47,15 @@ then
       "Humidity reached or exceeded the configured high limit for this equipment.",
       $t
   ));
+end
+rule "Plant climate — Humidity no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "CLM" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "HUMIDITY_PCT" )
+  not TelemetryReading( machineId == $m.machineId, metric == "HUMIDITY_PCT", value >= 64.0 )
+then
+  delete($a);
 end
 
 rule "Conveyor line — Vibration above high band"
@@ -56,6 +74,15 @@ then
       $t
   ));
 end
+rule "Conveyor line — Vibration no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "LIN" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "VIBRATION_RMS" )
+  not TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 3.85 )
+then
+  delete($a);
+end
 
 rule "CNC mill — Temperature above high band"
 salience 50
@@ -72,6 +99,15 @@ then
       "Temperature reached or exceeded the configured high limit for this equipment.",
       $t
   ));
+end
+rule "CNC mill — Temperature no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "CNC" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "TEMPERATURE_C" )
+  not TelemetryReading( machineId == $m.machineId, metric == "TEMPERATURE_C", value >= 67.5 )
+then
+  delete($a);
 end
 
 rule "CNC mill — Vibration above high band"
@@ -90,6 +126,15 @@ then
       $t
   ));
 end
+rule "CNC mill — Vibration no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "CNC" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "VIBRATION_RMS" )
+  not TelemetryReading( machineId == $m.machineId, metric == "VIBRATION_RMS", value >= 5.35 )
+then
+  delete($a);
+end
 
 rule "CNC mill — Spindle load above high band"
 salience 50
@@ -106,6 +151,15 @@ then
       "Spindle load reached or exceeded the configured high limit for this equipment.",
       $t
   ));
+end
+rule "CNC mill — Spindle load no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "CNC" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SPINDLE_LOAD_PCT" )
+  not TelemetryReading( machineId == $m.machineId, metric == "SPINDLE_LOAD_PCT", value >= 84.0 )
+then
+  delete($a);
 end
 
 rule "Auto packer — Reject rate above high band"
@@ -124,6 +178,15 @@ then
       $t
   ));
 end
+rule "Auto packer — Reject rate no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "PKG" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "REJECT_PCT" )
+  not TelemetryReading( machineId == $m.machineId, metric == "REJECT_PCT", value >= 4.5 )
+then
+  delete($a);
+end
 
 rule "Auto packer — Seal temperature above high band"
 salience 50
@@ -140,6 +203,15 @@ then
       "Seal temperature reached or exceeded the configured high limit for this equipment.",
       $t
   ));
+end
+rule "Auto packer — Seal temperature no longer above high band"
+salience 50
+when
+  $m : Machine( machineId == "PKG" )
+  $a : Anomaly( machineId == $m.machineId, type == AnomalyType.ABOVE_THRESHOLD, metricKey == "SEAL_TEMP_C" )
+  not TelemetryReading( machineId == $m.machineId, metric == "SEAL_TEMP_C", value >= 99.0 )
+then
+  delete($a);
 end
 
 

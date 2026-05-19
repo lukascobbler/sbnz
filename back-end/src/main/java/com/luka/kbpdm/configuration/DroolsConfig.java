@@ -75,10 +75,12 @@ public class DroolsConfig {
                 if (!metric.hasAnomalyThreshold()) {
                     continue;
                 }
-                String ruleName = machine.displayName() + " — " + metric.displayName() + " above high band";
+                String aboveRuleName = machine.displayName() + " — " + metric.displayName() + " above high band";
+                String clearRuleName = machine.displayName() + " — " + metric.displayName() + " no longer above high band";
                 String desc = metric.displayName() + " reached or exceeded the configured high limit for this equipment.";
                 rows.add(new String[]{
-                        ruleName,
+                        aboveRuleName,
+                        clearRuleName,
                         machine.machineId(),
                         metric.metricKey(),
                         Double.toString(metric.anomalyThreshold()),

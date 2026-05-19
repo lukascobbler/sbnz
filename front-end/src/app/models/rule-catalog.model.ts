@@ -1,4 +1,4 @@
-export type RuleCatalogSectionId = 'L1' | 'L2' | 'L3' | 'CEP' | 'QUERY';
+export type RuleCatalogSectionId = 'L1' | 'L2' | 'L3' | 'CEP';
 
 export type RuleCatalogProduceLabel = string;
 
@@ -25,7 +25,6 @@ export const RULE_CATALOG_SECTION_ORDER: RuleCatalogSectionId[] = [
   'L2',
   'L3',
   'CEP',
-  'QUERY',
 ];
 
 export const RULE_CATALOG_SECTION_LABEL: Record<RuleCatalogSectionId, string> = {
@@ -33,5 +32,4 @@ export const RULE_CATALOG_SECTION_LABEL: Record<RuleCatalogSectionId, string> = 
   L2: 'L2 rules',
   L3: 'L3 rules',
   CEP: 'CEP rules',
-  QUERY: 'Query (backward chaining) rules',
 };
