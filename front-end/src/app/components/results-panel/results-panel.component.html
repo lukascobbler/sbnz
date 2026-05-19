@@ -1,5 +1,4 @@
 <div class="results-stack">
-  <machine-health-dialog #healthDlg />
   <div class="grid results-two">
     <section class="card panel-with-info">
       <aside class="panel-side">
@@ -114,7 +113,6 @@
           <div class="th">Machine</div>
           <div class="th">Status</div>
           <div class="th wide">Reason</div>
-          <div class="th narrow">Health</div>
           <div class="th narrow">Fix</div>
         </div>
         <div class="table-body dashboard-scroll-body scroll-pad">
@@ -135,16 +133,6 @@
                 </span>
               </div>
               <div class="td small wide">{{ s.reason }}</div>
-              <div class="td narrow">
-                <button
-                  type="button"
-                  class="btn secondary btn-compact"
-                  [disabled]="controlsBusy"
-                  (click)="healthDlg.openFor(s.machineId)"
-                >
-                  Health
-                </button>
-              </div>
               <div class="td narrow">
                 <button
                   type="button"

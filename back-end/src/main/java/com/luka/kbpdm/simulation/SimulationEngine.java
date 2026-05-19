@@ -1,30 +1,24 @@
-package com.luka.kbpdm.service;
+package com.luka.kbpdm.simulation;
 
-import com.luka.kbpdm.api.MachineHealthReport;
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.RuleFiring;
 import com.luka.kbpdm.api.SensorStatus;
 import com.luka.kbpdm.api.SimulationReport;
 import com.luka.kbpdm.domain.diagnosis.*;
-import com.luka.kbpdm.domain.health.*;
 import com.luka.kbpdm.domain.machine.*;
 import com.luka.kbpdm.domain.safety.*;
 import com.luka.kbpdm.domain.telemetry.*;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
-import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MachineProfile;
 import com.luka.kbpdm.simulation.report.SimulationSnapshotBuilder;
 import com.luka.kbpdm.simulation.rules.RuleMatchModel;
 import com.luka.kbpdm.simulation.telemetry.SimulatedTelemetry;
-import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
+import com.luka.kbpdm.simulation.machines.MachineRegistry;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import lombok.Getter;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
-import org.kie.api.event.rule.DefaultRuleRuntimeEventListener;
-import org.kie.api.event.rule.ObjectInsertedEvent;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.rule.QueryResults;
-import org.kie.api.runtime.rule.QueryResultsRow;
 import org.kie.api.time.SessionPseudoClock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +38,7 @@ import static com.luka.kbpdm.simulation.SimulationConstants.*;
 public class SimulationEngine implements DisposableBean {
 
     private final KieContainer kieContainer;
-    private final MachineProcessRegistry machineRegistry;
+    private final MachineRegistry machineRegistry;
     private final SimulatedTelemetry telemetry = new SimulatedTelemetry();
 
     @Getter
@@ -63,11 +57,11 @@ public class SimulationEngine implements DisposableBean {
 
     private final Map<String, Map<String, MachineWorkload>> workloadByMachineMetric = new LinkedHashMap<>();
     private final Map<String, Long> tickIndexByMachine = new HashMap<>();
-    private final List<List<SensorStatus>> sensorTraceThisTick = new ArrayList<>();
+    private final List<List<SensorStatus>> sensorSnapshotsThisTick = new ArrayList<>();
 
     public SimulationEngine(
             KieContainer kieContainer,
-            MachineProcessRegistry machineRegistry,
+            MachineRegistry machineRegistry,
             @Value("${simulation.tickMinutes:30}") long tickMinutes
     ) {
         this.kieContainer = kieContainer;
@@ -89,7 +83,7 @@ public class SimulationEngine implements DisposableBean {
         this.simulatedTime = SIMULATION_EPOCH;
         this.workloadByMachineMetric.clear();
         this.tickIndexByMachine.clear();
-        for (MachineProcessProfile profile : machineRegistry.profilesInOrder()) {
+        for (MachineProfile profile : machineRegistry.profilesInOrder()) {
             Map<String, MachineWorkload> perMetric = new LinkedHashMap<>();
             for (MetricProfile metric : profile.metrics()) {
                 perMetric.put(metric.metricKey(), MachineWorkload.NORMAL);
@@ -113,31 +107,6 @@ public class SimulationEngine implements DisposableBean {
             }
         });
 
-        session.addEventListener(new DefaultRuleRuntimeEventListener() {
-            @Override
-            public void objectInserted(ObjectInsertedEvent e) {
-                Object o = e.getObject();
-                if (o instanceof RecordedAnomaly
-                        || o instanceof RecordedIntervention
-                        || o instanceof RecordedMachineOverworked
-                        || o instanceof RecordedFix) {
-                    return;
-                }
-                if (o instanceof Anomaly a) {
-                    String typeStr = a.getType() == null ? "" : a.getType().name();
-                    Instant at = a.getDetectedAt() != null ? a.getDetectedAt() : simulatedTime;
-                    session.insert(new RecordedAnomaly(a.getMachineId(), typeStr, a.getDescription(), at));
-                } else if (o instanceof Intervention i) {
-                    String pri = i.getPriority() == null ? "" : i.getPriority().name();
-                    Instant at = i.getDecidedAt() != null ? i.getDecidedAt() : simulatedTime;
-                    session.insert(new RecordedIntervention(i.getMachineId(), pri, i.getRecommendation(), at));
-                } else if (o instanceof MachineOverworked u) {
-                    session.insert(new RecordedMachineOverworked(
-                            u.getMachineId(), u.getDetails(), simulatedTime));
-                }
-            }
-        });
-
         seedFacts();
         rulesCollectedThisTick.clear();
         session.fireAllRules();
@@ -150,74 +119,6 @@ public class SimulationEngine implements DisposableBean {
         broadcastSnapshot();
     }
 
-    public synchronized MachineHealthReport machineHealthReport(String machineId) {
-        if (session == null || machineId == null || machineId.isBlank()) {
-            return null;
-        }
-        String id = machineId.trim();
-        if (!machineRegistry.hasMachine(id)) {
-            return null;
-        }
-        QueryResults results = session.getQueryResults("MachineHealth", id);
-        if (results == null || results.size() == 0) {
-            return null;
-        }
-        QueryResultsRow row = results.iterator().next();
-        int a = queryCount(row, "$a");
-        int iv = queryCount(row, "$i");
-        int u = queryCount(row, "$u");
-        int f = queryCount(row, "$f");
-        int hp = queryCount(row, "$health");
-        MachineHealthReport r = new MachineHealthReport();
-        r.setMachineId(id);
-        r.setHealthPercent(hp);
-        r.setAnomalyCount(a);
-        r.setInterventionCount(iv);
-        r.setMachineOverworkedCount(u);
-        r.setFixCount(f);
-        appendRecordedHistories(session, id, r);
-        return r;
-    }
-
-    private static int queryCount(QueryResultsRow row, String decl) {
-        Object o = row.get(decl);
-        if (o instanceof Number n) {
-            return n.intValue();
-        }
-        return 0;
-    }
-
-    private static void appendRecordedHistories(KieSession session, String id, MachineHealthReport r) {
-        Comparator<Instant> byTime = Comparator.nullsFirst(Comparator.naturalOrder());
-        WorkingMemoryOps.getFacts(session, RecordedAnomaly.class).stream()
-                .filter(x -> id.equals(x.getMachineId()))
-                .sorted(Comparator.comparing(RecordedAnomaly::getRecordedAt, byTime).reversed())
-                .forEach(x -> r.getAnomalyHistory()
-                        .add(new MachineHealthReport.AnomalyHistoryLine(
-                                x.getTypeName(), x.getDescription(), instantToString(x.getRecordedAt()))));
-        WorkingMemoryOps.getFacts(session, RecordedIntervention.class).stream()
-                .filter(x -> id.equals(x.getMachineId()))
-                .sorted(Comparator.comparing(RecordedIntervention::getRecordedAt, byTime).reversed())
-                .forEach(x -> r.getInterventionHistory()
-                        .add(new MachineHealthReport.InterventionHistoryLine(
-                                x.getPriority(), x.getRecommendation(), instantToString(x.getRecordedAt()))));
-        WorkingMemoryOps.getFacts(session, RecordedMachineOverworked.class).stream()
-                .filter(x -> id.equals(x.getMachineId()))
-                .sorted(Comparator.comparing(RecordedMachineOverworked::getRecordedAt, byTime).reversed())
-                .forEach(x -> r.getMachineOverworkedHistory()
-                        .add(new MachineHealthReport.MachineOverworkedHistoryLine(
-                                x.getDetails(), instantToString(x.getRecordedAt()))));
-        WorkingMemoryOps.getFacts(session, RecordedFix.class).stream()
-                .filter(x -> id.equals(x.getMachineId()))
-                .sorted(Comparator.comparing(RecordedFix::getRecordedAt, byTime).reversed())
-                .forEach(x -> r.getFixHistory()
-                        .add(new MachineHealthReport.FixHistoryLine(instantToString(x.getRecordedAt()))));
-    }
-
-    private static String instantToString(Instant i) {
-        return i == null ? "" : i.toString();
-    }
-
     public synchronized void setMachineWorkload(String machineId, MachineWorkload workload, String metricKey) {
         if (session == null || workload == null || metricKey == null || metricKey.isBlank()) {
             return;
@@ -225,7 +126,7 @@ public class SimulationEngine implements DisposableBean {
         if (!machineRegistry.hasMachine(machineId)) {
             return;
         }
-        MachineProcessProfile profile = machineRegistry.require(machineId);
+        MachineProfile profile = machineRegistry.require(machineId);
         MetricProfile metric = profile.metricOrNull(metricKey);
         if (metric == null || !metric.workloadEnabled()) {
             return;
@@ -233,12 +134,6 @@ public class SimulationEngine implements DisposableBean {
         Map<String, MachineWorkload> perMetric = workloadByMachineMetric.computeIfAbsent(machineId, k -> new LinkedHashMap<>());
         perMetric.put(metricKey, workload);
         broadcastSnapshot();
-    }
-
-    private static long clampTickMinutes(long tickMinutes) {
-        long t = Math.max(MIN_TICK_MINUTES, Math.min(MAX_TICK_MINUTES, tickMinutes));
-        t = (t / SIMULATED_MINUTES_BETWEEN_SAMPLES) * SIMULATED_MINUTES_BETWEEN_SAMPLES;
-        return t;
     }
 
     public synchronized void step(long stepMinutes) {
@@ -251,7 +146,7 @@ public class SimulationEngine implements DisposableBean {
         if (session == null || !machineRegistry.hasMachine(machineId)) {
             return;
         }
-        MachineProcessProfile profile = machineRegistry.require(machineId);
+        MachineProfile profile = machineRegistry.require(machineId);
         boolean known = false;
         for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
             if (machineId.equals(m.getMachineId())) {
@@ -262,7 +157,7 @@ public class SimulationEngine implements DisposableBean {
         if (!known) {
             return;
         }
-        session.insert(new RecordedFix(machineId, simulatedTime));
+
         WorkingMemoryOps.deleteFactsForMachine(session, Anomaly.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, Intervention.class, machineId);
         WorkingMemoryOps.deleteFactsForMachine(session, MachineOverworked.class, machineId);
@@ -281,7 +176,7 @@ public class SimulationEngine implements DisposableBean {
         }
 
         refreshSimulatedClock();
-        session.insert(new SafetyCheck(machineId, Duration.ofHours(24), simulatedTime));
+        session.insert(new SafetyCheck(machineId, simulatedTime));
         session.fireAllRules();
         broadcastSnapshot();
     }
@@ -308,9 +203,19 @@ public class SimulationEngine implements DisposableBean {
                 sensors,
                 workloadByMachineMetric,
                 machineRegistry.profilesInOrder(),
-                sensorTraceThisTick,
+                sensorSnapshotsThisTick,
                 rulesFromLastCompletedTick
         );
+    }
+
+    @Override
+    public void destroy() {
+        if (session != null) {
+            try {
+                session.dispose();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private void broadcastSnapshot() {
@@ -331,7 +236,7 @@ public class SimulationEngine implements DisposableBean {
 
         long step = Math.max(floorMinutes, stepMinutes);
         rulesCollectedThisTick.clear();
-        sensorTraceThisTick.clear();
+        sensorSnapshotsThisTick.clear();
 
         long remaining = step;
         while (remaining > 0) {
@@ -361,7 +266,7 @@ public class SimulationEngine implements DisposableBean {
             for (Machine m : WorkingMemoryOps.getFacts(session, Machine.class)) {
                 String id = m.getMachineId();
                 if (id != null) {
-                    session.insert(new SafetyCheck(id, Duration.ofHours(24), simulatedTime));
+                    session.insert(new SafetyCheck(id, simulatedTime));
                 }
             }
 
@@ -369,7 +274,7 @@ public class SimulationEngine implements DisposableBean {
             insertTickFactsForAllMachines(halted);
             session.fireAllRules();
 
-            sensorTraceThisTick.add(SimulatedTelemetry.copySensorsSnapshot(sensors));
+            sensorSnapshotsThisTick.add(SimulatedTelemetry.copySensorsSnapshot(sensors));
         }
 
         finalizeTickReporting();
@@ -394,7 +299,7 @@ public class SimulationEngine implements DisposableBean {
             if (id == null || haltedMachineIds.contains(id)) {
                 continue;
             }
-            MachineProcessProfile profile = machineRegistry.require(id);
+            MachineProfile profile = machineRegistry.require(id);
             Map<String, Double> valuesByMetric = latestValuesByMetric(profile);
             boolean stress = profile.sustainedStressBandActive(valuesByMetric);
             long idx = tickIndexByMachine.getOrDefault(id, 0L) + 1L;
@@ -419,7 +324,7 @@ public class SimulationEngine implements DisposableBean {
         }
     }
 
-    private Map<String, Double> latestValuesByMetric(MachineProcessProfile profile) {
+    private Map<String, Double> latestValuesByMetric(MachineProfile profile) {
         Map<String, Double> values = new LinkedHashMap<>();
         for (MetricProfile metric : profile.metrics()) {
             SensorStatus s = sensors.get(profile.machineId() + ":" + metric.metricKey());
@@ -428,31 +333,22 @@ public class SimulationEngine implements DisposableBean {
         return values;
     }
 
+    private static long clampTickMinutes(long tickMinutes) {
+        long t = Math.max(MIN_TICK_MINUTES, Math.min(MAX_TICK_MINUTES, tickMinutes));
+        t = (t / SIMULATED_MINUTES_BETWEEN_SAMPLES) * SIMULATED_MINUTES_BETWEEN_SAMPLES;
+        return t;
+    }
+
     private void refreshSimulatedClock() {
         WorkingMemoryOps.deleteFactsOfType(session, SimulatedClock.class);
         session.insert(new SimulatedClock(simulatedTime));
     }
 
     private void seedFacts() {
-        for (MachineProcessProfile p : machineRegistry.profilesInOrder()) {
-            session.insert(new Machine(p.machineId(), p.displayName(), p.machineType()));
-            session.insert(new ComponentStatus(
-                    p.machineId(),
-                    p.componentType(),
-                    simulatedTime
-            ));
+        for (MachineProfile p : machineRegistry.profilesInOrder()) {
+            session.insert(new Machine(p.machineId(), p.displayName()));
             telemetry.resetToNominal(sensors, simulatedTime, p);
         }
         session.insert(new SimulatedClock(simulatedTime));
-    }
-
-    @Override
-    public void destroy() {
-        if (session != null) {
-            try {
-                session.dispose();
-            } catch (Exception ignored) {
-            }
-        }
     }
 }

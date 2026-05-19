@@ -12,6 +12,5 @@ import java.time.Instant;
 @AllArgsConstructor
 public class SafetyCheck {
     private String machineId;
-    private Duration horizon;
     private Instant checkedAt;
 }

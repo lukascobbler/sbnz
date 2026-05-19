@@ -3,12 +3,11 @@ package com.luka.kbpdm.simulation.report;
 import com.luka.kbpdm.api.*;
 import com.luka.kbpdm.domain.diagnosis.Anomaly;
 import com.luka.kbpdm.domain.diagnosis.Intervention;
-import com.luka.kbpdm.domain.machine.ComponentStatus;
 import com.luka.kbpdm.domain.machine.Machine;
 import com.luka.kbpdm.domain.safety.SafetyResult;
 import com.luka.kbpdm.domain.safety.MachineOverworked;
 import com.luka.kbpdm.simulation.drools.WorkingMemoryOps;
-import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MachineProfile;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.kie.api.runtime.KieSession;
 
@@ -25,7 +24,7 @@ public final class SimulationSnapshotBuilder {
             KieSession session,
             Map<String, SensorStatus> sensors,
             Map<String, Map<String, MachineWorkload>> workloadByMachineMetric,
-            List<MachineProcessProfile> machineProfiles,
+            List<MachineProfile> machineProfiles,
             List<List<SensorStatus>> sensorTraceThisTick,
             List<RuleFiring> rulesFromLastCompletedTick
     ) {
@@ -48,16 +47,15 @@ public final class SimulationSnapshotBuilder {
         Map<String, String> nameByMachineId = machineIdToDisplayName(session);
         r.setAnomalies(sortAnomalies(new ArrayList<>(WorkingMemoryOps.getFacts(session, Anomaly.class)), nameByMachineId));
         r.setInterventions(sortInterventions(new ArrayList<>(WorkingMemoryOps.getFacts(session, Intervention.class)), nameByMachineId));
-        r.setComponents(WorkingMemoryOps.getFacts(session, ComponentStatus.class));
         r.setMachineOverworked(WorkingMemoryOps.getFacts(session, MachineOverworked.class));
         r.setSafetyResults(sortSafetyResults(new ArrayList<>(WorkingMemoryOps.getFacts(session, SafetyResult.class)), nameByMachineId));
         r.setRulesFiredThisTick(new ArrayList<>(rulesFromLastCompletedTick));
         return r;
     }
 
-    private static List<MachineProfileView> toMachineProfileViews(List<MachineProcessProfile> profiles) {
+    private static List<MachineProfileView> toMachineProfileViews(List<MachineProfile> profiles) {
         List<MachineProfileView> out = new ArrayList<>(profiles.size());
-        for (MachineProcessProfile p : profiles) {
+        for (MachineProfile p : profiles) {
             List<MetricProfileView> metrics = new ArrayList<>();
             for (MetricProfile m : p.metrics()) {
                 metrics.add(new MetricProfileView(
@@ -71,17 +69,17 @@ public final class SimulationSnapshotBuilder {
                         m.hasStressThreshold()
                 ));
             }
-            out.add(new MachineProfileView(p.machineId(), p.displayName(), p.machineType(), metrics));
+            out.add(new MachineProfileView(p.machineId(), p.displayName(), metrics));
         }
         return out;
     }
 
     private static Map<String, Map<String, MachineWorkload>> copyWorkloads(
             Map<String, Map<String, MachineWorkload>> source,
-            List<MachineProcessProfile> profiles
+            List<MachineProfile> profiles
     ) {
         Map<String, Map<String, MachineWorkload>> out = new LinkedHashMap<>();
-        for (MachineProcessProfile p : profiles) {
+        for (MachineProfile p : profiles) {
             Map<String, MachineWorkload> row = new LinkedHashMap<>();
             Map<String, MachineWorkload> srcRow = source.getOrDefault(p.machineId(), Map.of());
             for (MetricProfile m : p.metrics()) {

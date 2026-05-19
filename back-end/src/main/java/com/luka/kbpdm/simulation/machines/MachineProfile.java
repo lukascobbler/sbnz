@@ -1,25 +1,18 @@
 package com.luka.kbpdm.simulation.machines;
 
-import com.luka.kbpdm.domain.machine.ComponentType;
-import com.luka.kbpdm.domain.machine.MachineType;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public record MachineProcessProfile(
+public record MachineProfile(
         String machineId,
         String displayName,
-        MachineType machineType,
-        ComponentType componentType,
         List<MetricProfile> metrics
 ) {
-    public MachineProcessProfile {
+    public MachineProfile {
         Objects.requireNonNull(machineId, "machineId");
         Objects.requireNonNull(displayName, "displayName");
-        Objects.requireNonNull(machineType, "machineType");
-        Objects.requireNonNull(componentType, "componentType");
         Objects.requireNonNull(metrics, "metrics");
         if (metrics.isEmpty()) {
             throw new IllegalArgumentException(machineId + ": machine must define at least one metric");

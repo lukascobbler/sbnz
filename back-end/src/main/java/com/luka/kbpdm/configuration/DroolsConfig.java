@@ -1,7 +1,7 @@
 package com.luka.kbpdm.configuration;
 
-import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
-import com.luka.kbpdm.simulation.machines.MachineProcessRegistry;
+import com.luka.kbpdm.simulation.machines.MachineProfile;
+import com.luka.kbpdm.simulation.machines.MachineRegistry;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.drools.template.DataProviderCompiler;
 import org.drools.template.objects.ArrayDataProvider;
@@ -39,7 +39,7 @@ public class DroolsConfig {
     private static final String GENERATED_TRENDS_DEV_PATH = "src/main/resources/rules/generated_trends.drl";
 
     @Bean
-    public KieContainer kieContainer(MachineProcessRegistry machineRegistry) {
+    public KieContainer kieContainer(MachineRegistry machineRegistry) {
         KieServices ks = KieServices.Factory.get();
         KieFileSystem kfs = ks.newKieFileSystem();
 
@@ -68,9 +68,9 @@ public class DroolsConfig {
         return ks.newKieContainer(repo.getDefaultReleaseId());
     }
 
-    private void writeGeneratedThresholdRules(KieServices ks, KieFileSystem kfs, MachineProcessRegistry registry) {
+    private void writeGeneratedThresholdRules(KieServices ks, KieFileSystem kfs, MachineRegistry registry) {
         List<String[]> rows = new ArrayList<>();
-        for (MachineProcessProfile machine : registry.profilesInOrder()) {
+        for (MachineProfile machine : registry.profilesInOrder()) {
             for (MetricProfile metric : machine.metrics()) {
                 if (!metric.hasAnomalyThreshold()) {
                     continue;
@@ -90,9 +90,9 @@ public class DroolsConfig {
         writeGeneratedDrl(ks, kfs, drl, GENERATED_THRESHOLDS_KFS_PATH, GENERATED_THRESHOLDS_DEV_PATH);
     }
 
-    private void writeGeneratedTrendRules(KieServices ks, KieFileSystem kfs, MachineProcessRegistry registry) {
+    private void writeGeneratedTrendRules(KieServices ks, KieFileSystem kfs, MachineRegistry registry) {
         List<String[]> rows = new ArrayList<>();
-        for (MachineProcessProfile machine : registry.profilesInOrder()) {
+        for (MachineProfile machine : registry.profilesInOrder()) {
             for (MetricProfile metric : machine.metrics()) {
                 if (!metric.trendEnabled()) {
                     continue;

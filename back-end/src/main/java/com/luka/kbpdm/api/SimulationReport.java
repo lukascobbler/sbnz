@@ -3,7 +3,6 @@ package com.luka.kbpdm.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.luka.kbpdm.domain.diagnosis.Anomaly;
 import com.luka.kbpdm.domain.diagnosis.Intervention;
-import com.luka.kbpdm.domain.machine.ComponentStatus;
 import com.luka.kbpdm.domain.machine.Machine;
 import com.luka.kbpdm.domain.safety.SafetyResult;
 import com.luka.kbpdm.domain.safety.MachineOverworked;
@@ -40,7 +39,6 @@ public class SimulationReport {
     private List<Anomaly> anomalies = new ArrayList<>();
     private List<Intervention> interventions = new ArrayList<>();
 
-    private List<ComponentStatus> components = new ArrayList<>();
     private List<MachineOverworked> machineOverworked = new ArrayList<>();
     private List<SafetyResult> safetyResults = new ArrayList<>();
 }

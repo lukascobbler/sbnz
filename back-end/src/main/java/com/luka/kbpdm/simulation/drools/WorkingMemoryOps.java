@@ -1,7 +1,6 @@
 package com.luka.kbpdm.simulation.drools;
 
 import com.luka.kbpdm.domain.diagnosis.*;
-import com.luka.kbpdm.domain.health.*;
 import com.luka.kbpdm.domain.safety.*;
 import com.luka.kbpdm.domain.telemetry.*;
 import org.kie.api.runtime.ClassObjectFilter;
@@ -83,18 +82,6 @@ public final class WorkingMemoryOps {
         }
         if (o instanceof SafetyCheck s) {
             return s.getMachineId();
-        }
-        if (o instanceof RecordedAnomaly r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedIntervention r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedMachineOverworked r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedFix r) {
-            return r.getMachineId();
         }
         return null;
     }

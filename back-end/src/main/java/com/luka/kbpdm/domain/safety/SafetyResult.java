@@ -12,7 +12,6 @@ import java.time.Instant;
 @AllArgsConstructor
 public class SafetyResult {
     private String machineId;
-    private boolean safe;
     private String reason;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

@@ -3,7 +3,7 @@ package com.luka.kbpdm.simulation.telemetry;
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SensorStatus;
 import com.luka.kbpdm.domain.telemetry.TelemetryReading;
-import com.luka.kbpdm.simulation.machines.MachineProcessProfile;
+import com.luka.kbpdm.simulation.machines.MachineProfile;
 import com.luka.kbpdm.simulation.machines.MetricProfile;
 import org.kie.api.runtime.KieSession;
 
@@ -30,7 +30,7 @@ public final class SimulatedTelemetry {
             Set<String> haltedMachineIds,
             Map<String, Map<String, MachineWorkload>> workloadByMachineMetric,
             Instant simulatedTime,
-            MachineProcessProfile profile
+            MachineProfile profile
     ) {
         String machineId = profile.machineId();
         if (haltedMachineIds.contains(machineId)) {
@@ -45,7 +45,7 @@ public final class SimulatedTelemetry {
     public void resetToNominal(
             Map<String, SensorStatus> sensors,
             Instant simulatedTime,
-            MachineProcessProfile profile
+            MachineProfile profile
     ) {
         String machineId = profile.machineId();
         for (MetricProfile metric : profile.metrics()) {

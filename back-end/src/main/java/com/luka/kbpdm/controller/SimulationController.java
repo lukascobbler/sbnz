@@ -1,11 +1,9 @@
 package com.luka.kbpdm.controller;
 
-import com.luka.kbpdm.api.MachineHealthReport;
 import com.luka.kbpdm.api.MachineWorkload;
 import com.luka.kbpdm.api.SimulationReport;
-import com.luka.kbpdm.service.SimulationEngine;
+import com.luka.kbpdm.simulation.SimulationEngine;
 import lombok.Data;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,15 +20,6 @@ public class SimulationController {
     @GetMapping("/stream")
     public SseEmitter stream() {
         return engine.stream();
-    }
-
-    @GetMapping("/machines/{machineId}/health")
-    public ResponseEntity<MachineHealthReport> machineHealth(@PathVariable String machineId) {
-        MachineHealthReport r = engine.machineHealthReport(machineId);
-        if (r == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(r);
     }
 
     @PostMapping("/reset")

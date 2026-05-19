@@ -2,8 +2,6 @@ package com.luka.kbpdm.simulation.rules;
 
 import com.luka.kbpdm.api.RuleFiring;
 import com.luka.kbpdm.domain.diagnosis.*;
-import com.luka.kbpdm.domain.health.*;
-import com.luka.kbpdm.domain.machine.ComponentStatus;
 import com.luka.kbpdm.domain.machine.Machine;
 import com.luka.kbpdm.domain.safety.*;
 import com.luka.kbpdm.domain.telemetry.*;
@@ -50,9 +48,6 @@ public final class RuleMatchModel {
         if (o instanceof Intervention i) {
             return i.getMachineId();
         }
-        if (o instanceof ComponentStatus c) {
-            return c.getMachineId();
-        }
         if (o instanceof SafetyCheck s) {
             return s.getMachineId();
         }
@@ -67,18 +62,6 @@ public final class RuleMatchModel {
         }
         if (o instanceof CurrentMetric c) {
             return c.getMachineId();
-        }
-        if (o instanceof RecordedAnomaly r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedIntervention r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedMachineOverworked r) {
-            return r.getMachineId();
-        }
-        if (o instanceof RecordedFix r) {
-            return r.getMachineId();
         }
         return null;
     }

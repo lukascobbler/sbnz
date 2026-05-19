@@ -160,11 +160,6 @@ export class SimulationService {
     return this.http.post<SimulationReport>('/api/v1/sim/workload', { machineId, workload, metricKey });
   }
 
-  getMachineHealth(machineId: string) {
-    const id = encodeURIComponent(machineId.trim());
-    return this.http.get<MachineHealthReport>(`/api/v1/sim/machines/${id}/health`);
-  }
-
   safetyFix(machineId: string) {
     const trimmed = machineId.trim();
     this.pendingStripDiagnosesFor = trimmed;

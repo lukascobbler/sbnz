@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class Machine {
     private String machineId;
     private String name;
-    private MachineType type;
 }
