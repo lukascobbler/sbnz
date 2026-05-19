@@ -142,7 +142,7 @@ public class SimulationEngine implements DisposableBean {
         broadcastSnapshot();
     }
 
-    public synchronized void operatorSafetyFix(String machineId) {
+    public synchronized void machineFix(String machineId) {
         if (session == null || !machineRegistry.hasMachine(machineId)) {
             return;
         }
@@ -247,7 +247,6 @@ public class SimulationEngine implements DisposableBean {
 
             WorkingMemoryOps.deleteFactsOfType(session, SafetyCheck.class);
             WorkingMemoryOps.deleteFactsOfType(session, SafetyResult.class);
-            WorkingMemoryOps.deleteTransientMachineOverworked(session);
 
             refreshSimulatedClock();
 

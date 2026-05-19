@@ -41,9 +41,6 @@ public final class WorkingMemoryOps {
         }
     }
 
-    public static void deleteTransientMachineOverworked(KieSession session) {
-    }
-
     public static void deleteFactsForMachine(KieSession session, Class<?> type, String machineId) {
         for (Object o : new ArrayList<>(session.getObjects(new ClassObjectFilter(type)))) {
             if (machineId.equals(extractMachineId(o))) {

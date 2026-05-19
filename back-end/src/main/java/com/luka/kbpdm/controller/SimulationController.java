@@ -46,7 +46,7 @@ public class SimulationController {
         if (req == null || req.getMachineId() == null || req.getMachineId().isBlank()) {
             return engine.snapshot();
         }
-        engine.operatorSafetyFix(req.getMachineId().trim());
+        engine.machineFix(req.getMachineId().trim());
         return engine.snapshot();
     }
 

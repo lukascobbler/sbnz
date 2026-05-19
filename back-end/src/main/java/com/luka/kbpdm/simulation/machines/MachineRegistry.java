@@ -63,7 +63,7 @@ public final class MachineRegistry {
                 "Auto packer",
                 List.of(
                         new MetricProfile("CASES_PER_MIN", "Throughput", "cases/min", 1, 118.0, 2.4, null, null, true, true),
-                        new MetricProfile("REJECT_PCT", "Reject rate", "%", 2, 1.8, 0.1, 4.5, null, true, true),
+                        new MetricProfile("REJECT_PCT", "Reject rate", "%", 2, 1.8, 0.1, 4.5, 6.0, true, true),
                         new MetricProfile("SEAL_TEMP_C", "Seal temperature", "C", 1, 88.0, 0.32, 99.0, 105.0, true, true)
                 )
         );

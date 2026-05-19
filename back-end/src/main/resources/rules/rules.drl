@@ -23,38 +23,38 @@ declare TickStatus
   @timestamp( ts )
 end
 
-rule "Pushed conveyor line (belt speed, vibration, pack throughput)"
+rule "Pushed conveyor line (belt speed, vibration, reject rate)"
 salience 35
 when
   SimulatedClock( $t : now )
   CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
   CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
-  CurrentMetric( machineId == "PKG", metricKey == "CASES_PER_MIN", value >= 125.0 )
+  CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2.5 )
   not Intervention( sourceRule == "X_PUSHED_LINE" )
 then
   insert(new Intervention(
       "LIN",
-      PriorityLevel.HIGH,
+      PriorityLevel.MEDIUM,
       "X_PUSHED_LINE",
-      "Line is being pushed (high belt speed + high pack throughput) while conveyor vibration is elevated: reduce line speed and inspect bearings/alignment.",
+      "Line is being pushed (high belt speed + high rejection rate) while conveyor vibration is elevated: reduce line speed and inspect bearings/alignment.",
       $t
   ));
 end
 
-rule "Conveyor line instability (belt speed, vibration, reject rate)"
+rule "CNC high spindle load and line speed causing high seal temperature (spindle load, line belt speed, seal temperature)"
 salience 34
 when
   SimulatedClock( $t : now )
-  CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
-  CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
-  CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2 )
-  not Intervention( sourceRule == "X_LIN_INSTABILITY" )
+  CurrentMetric( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", value >= 80 )
+  CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 98.0 )
+  CurrentMetric( machineId == "PKG", metricKey == "SEAL_TEMP_C", value >= 93.0 )
+  not Intervention( sourceRule == "X_LIN_TOO_FAST" )
 then
   insert(new Intervention(
       "LIN",
-      PriorityLevel.MEDIUM,
-      "X_LIN_INSTABILITY",
-      "Conveyor vibration is trending high at elevated belt speed while downstream rejects increase: inspect belt tracking, tension, and bearing condition.",
+      PriorityLevel.HIGH,
+      "X_LIN_TOO_FAST",
+      "CNC spindle load and LIN belt speed is causing too high seal temperature: inspect LIN machine.",
       $t
   ));
 end
@@ -67,21 +67,21 @@ when
   not(
     CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
     and CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
-    and CurrentMetric( machineId == "PKG", metricKey == "CASES_PER_MIN", value >= 125.0 )
+    and CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2.5 )
   )
 then
   delete($i);
 end
 
-rule "Clear conveyor-instability intervention"
+rule "Clear CNC spindle load and belt speed causing high seal temperature intervention"
 salience 5
 when
   SimulatedClock( $t : now )
-  $i : Intervention( sourceRule == "X_LIN_INSTABILITY", decidedAt != null, decidedAt < $t )
+  $i : Intervention( sourceRule == "X_LIN_TOO_FAST", decidedAt != null, decidedAt < $t )
   not(
-    CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 99.0 )
-    and CurrentMetric( machineId == "LIN", metricKey == "VIBRATION_RMS", value >= 3.5 )
-    and CurrentMetric( machineId == "PKG", metricKey == "REJECT_PCT", value >= 2 )
+      CurrentMetric( machineId == "CNC", metricKey == "SPINDLE_LOAD_PCT", value >= 80 )
+      and CurrentMetric( machineId == "LIN", metricKey == "BELT_SPEED_PCT", value >= 98.0 )
+      and CurrentMetric( machineId == "PKG", metricKey == "SEAL_TEMP_C", value >= 93.0 )
   )
 then
   delete($i);
@@ -102,7 +102,7 @@ when
 then
   insert(new MachineOverworked(
       $id,
-      "The line was stopped after repeated high readings on a critical sensor. Use Fix to acknowledge and reset."
+      "Use Fix to acknowledge and reset."
   ));
   insert(new Intervention(
       $id,

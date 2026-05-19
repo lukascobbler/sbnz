@@ -142,44 +142,35 @@ export const RULE_CATALOG_ENTRIES: RuleCatalogEntry[] = [
   },
 
   {
-    engineName: 'Pushed conveyor line (belt speed, vibration, pack throughput)',
+    engineName: 'Pushed conveyor line (belt speed, vibration, reject rate)',
     section: L3,
-    title: 'Pushed conveyor line (belt speed, vibration, pack throughput)',
+    title: 'Pushed conveyor line (belt speed, vibration, reject rate)',
     description:
-      'Runs when belt speed, conveyor vibration, and pack throughput are all in their raised bands at the same time, and the matching high-priority recommendation is not already active.',
+      'Runs when belt speed, conveyor vibration, and reject rate are all in their raised bands at the same time, and the matching medium-priority recommendation is not already active.',
     fromTemplate: false,
     produces: ['Intervention'],
     clearCounterpart: {
       engineName: 'Clear pushed-line intervention',
       title: 'Clear pushed-line intervention',
       description:
-        'Runs once simulated time has moved past the moment the pushed-line intervention was created, and belt speed, vibration, and pack throughput are no longer all in their raised band together.',
+        'Runs once simulated time has moved past the moment the pushed-line intervention was created, and belt speed, vibration, and rejection rate are no longer all in their raised band together.',
       removes: ['Intervention'],
     },
   },
-  {
-    engineName: 'Clear pushed-line intervention',
-    section: L2,
-    title: 'Clear pushed-line intervention',
-    description:
-      'Runs once simulated time has moved past the moment the pushed-line intervention was created, and belt speed, vibration, and pack throughput are no longer all in their raised band together.',
-    fromTemplate: false,
-    catalogHidden: true,
-  },
 
   {
-    engineName: 'Conveyor line instability (belt speed, vibration, reject rate)',
+    engineName: 'CNC high spindle load and line speed causing high seal temperature (spindle load, line belt speed, seal temperature)',
     section: L3,
-    title: 'Conveyor line instability (belt speed, vibration, reject rate)',
+    title: 'CNC high spindle load and line speed causing high seal temperature (spindle load, line belt speed, seal temperature)',
     description:
-      'Runs when belt speed and conveyor vibration are raised while reject rate is up, and the matching medium-priority recommendation is not already active.',
+      'Runs when spindle load and line speed are raised while the seal temperature is high, being of the high intervention priority.',
     fromTemplate: false,
     produces: ['Intervention'],
     clearCounterpart: {
-      engineName: 'Clear conveyor-instability intervention',
-      title: 'Clear conveyor-instability intervention',
+      engineName: 'Clear CNC spindle load and belt speed causing high seal temperature intervention',
+      title: 'Clear CNC spindle load and belt speed causing high seal temperature intervention',
       description:
-        'Runs once simulated time has moved past the moment the conveyor-instability intervention was created, and the combination of raised belt speed, raised vibration, and raised reject rate no longer all holds.',
+        'Runs once simulated time has moved past the moment the cnc-line high seal temperature intervention was created, and the combination of raised spindle load, raised belt speed, and raised seal temperature no longer all holds.',
       removes: ['Intervention'],
     },
   },
